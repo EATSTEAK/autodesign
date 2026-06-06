@@ -1,5 +1,5 @@
-# Hooks Payload Placeholder
+# Payload Hooks
 
-Future lifecycle hook definitions or adapters will live here.
+Stage 03 includes no-op hook adapters only.
 
-This directory intentionally contains no hook runtime behavior in Stage 02.
+The bundled hooks are safe placeholders that return static metadata when imported or run in debug mode. They do not trigger generation, Pencil operations, handoff, or real subskill phase behavior.

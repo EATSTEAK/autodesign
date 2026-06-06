@@ -1,35 +1,95 @@
 {
   "schemaVersion": 1,
-  "stage": "02-package-scaffold",
+  "stage": "03-bootstrap-runtime",
   "publicSkills": [
     "autodesign-start"
   ],
   "payloadRoot": "autodesign-start/assets/payload",
-  "runtimeImplemented": false,
-  "placeholders": [
+  "runtimeImplemented": true,
+  "entrypoints": [
     {
-      "path": "subskills/",
-      "purpose": "Future expanded private Autodesign subskills.",
-      "status": "placeholder"
+      "name": "bootstrap-plan",
+      "command": "node autodesign-start/assets/payload/scripts/bootstrap.mjs --target <workspace> --plan",
+      "writesFiles": false
     },
     {
-      "path": "scripts/",
-      "purpose": "Future deterministic bootstrap and generation helper scripts.",
-      "status": "placeholder"
+      "name": "bootstrap-apply",
+      "command": "node autodesign-start/assets/payload/scripts/bootstrap.mjs --target <workspace> --apply --approve-bootstrap",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-bootstrap"
+      ]
     },
     {
-      "path": "hooks/",
-      "purpose": "Future lifecycle hook definitions or adapters.",
-      "status": "placeholder"
-    },
-    {
-      "path": "workspace-template/",
-      "purpose": "Future Autodesign workspace template files.",
-      "status": "placeholder"
+      "name": "bootstrap-apply-with-overwrite",
+      "command": "node autodesign-start/assets/payload/scripts/bootstrap.mjs --target <workspace> --apply --approve-bootstrap --approve-overwrite",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-bootstrap",
+        "--approve-overwrite"
+      ]
     }
   ],
+  "payload": {
+    "subskills": [
+      {
+        "path": "subskills/autodesign-bootstrap-runtime/SKILL.md",
+        "status": "no-op-placeholder",
+        "purpose": "Private bootstrap runtime boundary documentation."
+      },
+      {
+        "path": "subskills/autodesign-phase-placeholder/SKILL.md",
+        "status": "no-op-placeholder",
+        "purpose": "Private placeholder for later Autodesign phase subskills."
+      }
+    ],
+    "scripts": [
+      {
+        "path": "scripts/bootstrap.mjs",
+        "status": "implemented",
+        "purpose": "Deterministic plan/apply materialization of workspace-template."
+      }
+    ],
+    "hooks": [
+      {
+        "path": "hooks/autodesign-bootstrap-noop.mjs",
+        "status": "no-op-placeholder",
+        "purpose": "Bundled no-op hook adapter."
+      }
+    ],
+    "workspaceTemplate": [
+      "workspace-template/AGENTS.md",
+      "workspace-template/.codex/config.toml",
+      "workspace-template/.codex/hooks/autodesign-bootstrap-noop.mjs",
+      "workspace-template/.codex/hooks/autodesign-boundary-noop.mjs",
+      "workspace-template/autodesign/README.md",
+      "workspace-template/autodesign/.system/install-state.json",
+      "workspace-template/autodesign/inputs/README.md",
+      "workspace-template/autodesign/outputs/README.md",
+      "workspace-template/autodesign/logs/README.md"
+    ]
+  },
+  "approvalGates": {
+    "planBeforeApply": true,
+    "applyRequires": [
+      "--approve-bootstrap"
+    ],
+    "overwriteRequires": [
+      "--approve-overwrite"
+    ]
+  },
+  "disabledBehaviors": {
+    "canonicalGeneration": true,
+    "imageGeneration": true,
+    "pencilOperations": true,
+    "visualReferenceGeneration": true,
+    "designSystemGeneration": true,
+    "handoff": true,
+    "realSubskillPhaseBehavior": true
+  },
   "notes": [
     "autodesign-start is the only public skill at install time.",
-    "No runtime generation behavior is implemented in Stage 02."
+    "Stage 03 only materializes bootstrap workspace files.",
+    "No canonical generation, image generation, Pencil operation, or real phase behavior is implemented."
   ]
 }

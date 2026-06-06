@@ -1,5 +1,5 @@
-# Subskills Payload Placeholder
+# Payload Subskills
 
-Future expanded Autodesign subskills will live here as bundled payload resources.
+Stage 03 includes concrete private subskill placeholders only.
 
-This directory is intentionally inert in Stage 02. Do not add public install-time skills or executable behavior here until later stages define the subskill contract.
+These subskills are not public install-time skills. They document bootstrap boundaries and future phase slots, but they do not implement canonical generation, image generation, Pencil operations, visual reference generation, design-system work, handoff, or real phase behavior.

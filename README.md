@@ -1,12 +1,28 @@
 # Autodesign
 
-Installable Codex skill package scaffold for `eatsteak/autodesign`.
+Installable Codex skill package for `eatsteak/autodesign`.
 
 ## Public Skill Surface
 
-`autodesign-start/` is the only public skill exposed at install time. Future runtime assets, private expanded subskills, scripts, hooks, and workspace files are bundled under `autodesign-start/assets/payload/`.
+`autodesign-start/` is the only public skill exposed at install time. Runtime assets, private expanded subskill placeholders, scripts, hooks, and workspace files are bundled under `autodesign-start/assets/payload/`.
 
-Stage 02 is structural only. It does not implement bootstrap runtime behavior, generators, hook execution, image generation, Pencil operations, or workspace materialization.
+Stage 03 implements only the bootstrap runtime. It does not implement canonical generation, image generation, Pencil operations, visual reference generation, design-system work, handoff, or real subskill phase behavior.
+
+## Bootstrap Runtime
+
+Plan a target workspace first:
+
+```bash
+node autodesign-start/assets/payload/scripts/bootstrap.mjs --target /absolute/path/to/project --plan
+```
+
+Apply only with explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/bootstrap.mjs --target /absolute/path/to/project --apply --approve-bootstrap
+```
+
+If the plan reports overwrites, add `--approve-overwrite` only after separate overwrite approval.
 
 ## Package Layout
 
@@ -22,4 +38,4 @@ autodesign-start/
       workspace-template/
 ```
 
-This scaffold is ready for Stage 03 to add an explicit bootstrap runtime entrypoint while keeping `autodesign-start` as the public install-time skill.
+The bootstrap script materializes `AGENTS.md`, `.codex/config.toml`, `.codex/hooks/*.mjs`, and the `autodesign/` workspace files from the bundled template.

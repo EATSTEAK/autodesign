@@ -1,0 +1,11 @@
+# Autodesign Stage 03 project-local marker.
+# The hook files listed here are no-op placeholders.
+
+[autodesign]
+stage = "03-bootstrap-runtime"
+runtime = "bootstrap-only"
+install_state = "autodesign/.system/install-state.json"
+
+[autodesign.hooks]
+bootstrap_noop = ".codex/hooks/autodesign-bootstrap-noop.mjs"
+boundary_noop = ".codex/hooks/autodesign-boundary-noop.mjs"

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "stage": "03-bootstrap-runtime",
+  "package": "eatsteak/autodesign",
+  "publicSkill": "autodesign-start",
+  "runtime": "bootstrap-only",
+  "materializedBy": "autodesign-start/assets/payload/scripts/bootstrap.mjs",
+  "approvalGates": {
+    "applyRequires": [
+      "--approve-bootstrap"
+    ],
+    "overwriteRequires": [
+      "--approve-overwrite"
+    ]
+  },
+  "materializedFiles": [
+    "AGENTS.md",
+    ".codex/config.toml",
+    ".codex/hooks/autodesign-bootstrap-noop.mjs",
+    ".codex/hooks/autodesign-boundary-noop.mjs",
+    "autodesign/README.md",
+    "autodesign/.system/install-state.json",
+    "autodesign/inputs/README.md",
+    "autodesign/outputs/README.md",
+    "autodesign/logs/README.md"
+  ],
+  "disabledBehaviors": {
+    "canonicalGeneration": true,
+    "imageGeneration": true,
+    "pencilOperations": true,
+    "visualReferenceGeneration": true,
+    "designSystemGeneration": true,
+    "handoff": true,
+    "realSubskillPhaseBehavior": true
+  }
+}
