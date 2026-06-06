@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-export const STAGE = "06-canonical-pipeline";
+export const STAGE = "07-visual-reference-gates";
 export const DEFAULT_MANIFEST_REL = "autodesign/manifest.json";
 export const DEFAULT_GRAPH_REL = "autodesign/artifact-graph.json";
 
@@ -46,6 +46,13 @@ const REFERENCE_ONLY_KINDS = new Set([
   "prototype",
   "handoff"
 ]);
+const STAGE_07_DISABLED_BEHAVIOR_KEYS = new Set([
+  "pencilOperations",
+  "designSystemGeneration",
+  "prototypeGeneration",
+  "handoff",
+  "realSubskillPhaseBehavior"
+]);
 const VALID_SUBSKILL_STATUSES = new Set([
   "contract-only",
   "implemented"
@@ -58,6 +65,9 @@ const VALID_SUBSKILL_HARD_GATES = new Set([
   "disabled-behaviors.enforced",
   "canonical-generation.enabled",
   "platform-selection.present",
+  "canonical-visual-anchors.generated",
+  "canonical-visual-anchor-selection.approved",
+  "visual-reference-generation.enabled",
   "no-real-phase-behavior"
 ]);
 
@@ -209,6 +219,10 @@ export async function checkSubskillCanRun(state, subskillName) {
       canonicalGenerationEnabled: state.manifest.disabledBehaviors
         && state.manifest.disabledBehaviors.canonicalGeneration === false,
       platformSelectionPresent: false,
+      canonicalVisualAnchorsGenerated: false,
+      canonicalVisualAnchorSelectionApproved: false,
+      visualReferenceGenerationEnabled: state.manifest.disabledBehaviors
+        && state.manifest.disabledBehaviors.visualReferenceGeneration === false,
       noRealPhaseBehavior: false
     },
     hardGates: [],
@@ -259,6 +273,8 @@ export async function checkSubskillCanRun(state, subskillName) {
 
   result.phaseBehaviorAllowed = contract.contractOnly === false && contract.implemented === true;
   result.checks.platformSelectionPresent = await detectPlatformSelectionPresent(state);
+  result.checks.canonicalVisualAnchorsGenerated = await detectGeneratedArtifactPresent(state, "canonical.visual-anchor-proposals");
+  result.checks.canonicalVisualAnchorSelectionApproved = isGateApproved(state.manifest, "canonical.visual-anchor-selection");
 
   const artifactIndex = buildArtifactIndex(state.graph);
   const upstreamArtifacts = Array.isArray(contract.requiredUpstreamArtifacts) ? contract.requiredUpstreamArtifacts : [];
@@ -374,6 +390,9 @@ export async function checkSubskillCanRun(state, subskillName) {
     "disabled-behaviors.enforced": result.checks.disabledBehaviorsEnforced,
     "canonical-generation.enabled": result.checks.canonicalGenerationEnabled,
     "platform-selection.present": result.checks.platformSelectionPresent,
+    "canonical-visual-anchors.generated": result.checks.canonicalVisualAnchorsGenerated,
+    "canonical-visual-anchor-selection.approved": result.checks.canonicalVisualAnchorSelectionApproved,
+    "visual-reference-generation.enabled": result.checks.visualReferenceGenerationEnabled,
     "no-real-phase-behavior": result.checks.noRealPhaseBehavior
   };
 
@@ -412,7 +431,7 @@ export async function checkSubskillCanRun(state, subskillName) {
     result.warnings.push({
       check: "contract-only",
       path: contract.path,
-      message: "Contract boundary can be entered, but real downstream phase behavior must not run in Stage 06."
+      message: "Contract boundary can be entered, but later downstream phase behavior must not run in Stage 07."
     });
   }
 
@@ -632,6 +651,9 @@ export function formatSubskillRunCheck(result) {
     `phase behavior allowed: ${result.phaseBehaviorAllowed ? "yes" : "no"}`,
     `canonical generation enabled: ${result.checks.canonicalGenerationEnabled ? "yes" : "no"}`,
     `platform selection present: ${result.checks.platformSelectionPresent ? "yes" : "no"}`,
+    `canonical visual anchors generated: ${result.checks.canonicalVisualAnchorsGenerated ? "yes" : "no"}`,
+    `canonical visual anchor approved: ${result.checks.canonicalVisualAnchorSelectionApproved ? "yes" : "no"}`,
+    `visual reference generation enabled: ${result.checks.visualReferenceGenerationEnabled ? "yes" : "no"}`,
     `errors: ${result.errors.length}`,
     `warnings: ${result.warnings.length}`
   ];
@@ -954,12 +976,20 @@ function validateDisabledBehaviors(manifest, result) {
   }
 
   if (manifest.disabledBehaviors.canonicalGeneration !== false) {
-    addError(result, "manifest.disabledBehaviors.canonicalGeneration", "Stage 06 must enable canonical generation");
+    addError(result, "manifest.disabledBehaviors.canonicalGeneration", "Stage 07 must keep canonical generation available for canonical upstream repair");
   }
 
-  for (const key of DISABLED_BEHAVIOR_KEYS.filter((candidate) => candidate !== "canonicalGeneration")) {
+  if (manifest.disabledBehaviors.imageGeneration !== false) {
+    addError(result, "manifest.disabledBehaviors.imageGeneration", "Stage 07 must allow active-agent image generation instructions");
+  }
+
+  if (manifest.disabledBehaviors.visualReferenceGeneration !== false) {
+    addError(result, "manifest.disabledBehaviors.visualReferenceGeneration", "Stage 07 must enable visual reference record generation");
+  }
+
+  for (const key of STAGE_07_DISABLED_BEHAVIOR_KEYS) {
     if (manifest.disabledBehaviors[key] !== true) {
-      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 06 must keep this behavior disabled");
+      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 07 must keep this downstream behavior disabled");
     }
   }
 }
@@ -1096,11 +1126,11 @@ function validateGraph(graph, result) {
     }
 
     if (REFERENCE_ONLY_KINDS.has(artifact.kind) && artifact.referenceOnly !== true) {
-      addError(result, `${basePath}.referenceOnly`, "downstream visual/Pencil/DS/prototype/handoff artifacts must be reference-only in Stage 06");
+      addError(result, `${basePath}.referenceOnly`, "downstream visual/Pencil/DS/prototype/handoff artifacts must be reference-only");
     }
 
-    if (REFERENCE_ONLY_KINDS.has(artifact.kind) && artifact.generated !== false) {
-      addError(result, `${basePath}.generated`, "downstream visual/Pencil/DS/prototype/handoff artifacts must not be generated in Stage 06");
+    if (artifact.kind !== "visual-reference" && REFERENCE_ONLY_KINDS.has(artifact.kind) && artifact.generated !== false) {
+      addError(result, `${basePath}.generated`, "Pencil/DS/prototype/handoff artifacts must not be generated in Stage 07");
     }
 
     result.counts.dependencies += Array.isArray(artifact.upstreamDependencies) ? artifact.upstreamDependencies.length : 0;
@@ -1428,6 +1458,29 @@ function containsPlatformSelection(text) {
   ];
 
   return phrasePatterns.some((pattern) => pattern.test(normalized));
+}
+
+async function detectGeneratedArtifactPresent(state, artifactId) {
+  const artifact = buildArtifactIndex(state.graph).get(artifactId);
+  if (!artifact || artifact.generated !== true) {
+    return false;
+  }
+
+  const generatedRecordExists = (Array.isArray(state.manifest.generationRecords) ? state.manifest.generationRecords : [])
+    .some((record) => record
+      && Array.isArray(record.artifacts)
+      && record.artifacts.includes(artifactId));
+
+  if (!generatedRecordExists) {
+    return false;
+  }
+
+  return pathExists(resolveAgainst(state.workspaceRoot, artifact.path));
+}
+
+function isGateApproved(manifest, gateId) {
+  return (Array.isArray(manifest.approvalGates) ? manifest.approvalGates : [])
+    .some((gate) => gate && gate.id === gateId && gate.status === "approved");
 }
 
 function compareArtifactIds(graph, order = null) {

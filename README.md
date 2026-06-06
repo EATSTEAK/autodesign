@@ -6,9 +6,11 @@ Installable Codex skill package for `eatsteak/autodesign`.
 
 `autodesign-start/` is the only public skill exposed at install time. Runtime assets, private expanded subskill contracts, scripts, hooks, and workspace files are bundled under `autodesign-start/assets/payload/`.
 
-Stage 06 implements bootstrap workspace materialization, deterministic manifest and artifact graph state management, private subskill readiness checks, and canonical pipeline generation from real project input files. It generates canonical planning artifacts only: project brief/interview intent, requirements/stories, brand direction, UX rules, screen model, interaction model, coverage matrix, decision log, navigation, screen-state matrix, and unapproved primary visual anchor proposals.
+Stage 07 implements bootstrap workspace materialization, deterministic manifest and artifact graph state management, private subskill readiness checks, canonical pipeline generation from real project input files, and visual reference gates. Canonical generation emits project brief/interview intent, requirements/stories, brand direction, UX rules, screen model, interaction model, coverage matrix, decision log, navigation, screen-state matrix, and unapproved primary visual anchor proposals.
 
-Stage 06 does not implement image generation, Pencil operations, visual reference generation, design-system work, prototype generation, handoff, report generation, skill optimization, or downstream phase behavior.
+Stage 07 adds prompt, candidate, and selected-reference records for visual references. Prompt records instruct the active agent to generate real images without hardcoding an image model. Candidate records persist only real generated output paths and review metadata. Selected references require explicit user approval and cannot be auto-selected.
+
+Stage 07 does not implement Pencil operations, design-system work, prototype generation, handoff, report generation, skill optimization, or later downstream phase behavior.
 
 ## Bootstrap Runtime
 
@@ -45,7 +47,7 @@ The bootstrap script materializes `AGENTS.md`, `.codex/config.toml`, `.codex/hoo
 
 ## Manifest And Artifact Graph
 
-Stage 06 materializes:
+Stage 07 materializes:
 
 - `autodesign/manifest.json`
 - `autodesign/artifact-graph.json`
@@ -91,3 +93,29 @@ node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace 
 ```
 
 UX rules, interaction model, screen-state matrix, and visual anchor proposals require explicit platform selection in `autodesign/inputs`. Visual anchor proposals are generated with `approved: false`; selecting or approving an anchor belongs to a later stage.
+
+## Visual Reference Gates
+
+Plan prompt records from generated canonical visual anchor proposals:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action prompts --plan
+```
+
+Apply prompt records only with explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action prompts --apply --approve-visual-prompts --actor <actor> --at <timestamp>
+```
+
+After the active agent creates a real image file, record it as a candidate. Candidate apply requires manual approval of `canonical.visual-anchor-selection`:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action candidates --prompt-id <prompt-id> --generated-output-path <path> --apply --approve-visual-candidates --actor <actor> --at <timestamp>
+```
+
+Select references only by explicit id and explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action selection --reference-id <candidate-id> --apply --approve-visual-reference-selection --actor <actor> --at <timestamp>
+```

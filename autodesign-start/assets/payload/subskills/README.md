@@ -1,6 +1,6 @@
 # Payload Subskills
 
-Stage 06 includes concrete private subskill contracts.
+Stage 07 includes concrete private subskill contracts.
 
 These subskills are not public install-time skills. `autodesign-start` remains the only public router.
 
@@ -19,4 +19,6 @@ node autodesign-start/assets/payload/scripts/can-run-subskill.mjs --workspace /a
 
 The readiness check validates manifest state, graph dependencies, required upstream artifact paths, declared output artifact ids, disabled behavior guards, and canonical hard gates such as platform selection.
 
-The canonical subskills `interview`, `stories`, `brand`, `views`, `ux`, and `visual-anchors` are implemented through `scripts/generate-canonical.mjs`. Downstream visual, Pencil, design-system, prototype, handoff, reconcile, eval, and skill optimization subskills remain contract-only in Stage 06.
+The canonical subskills `interview`, `stories`, `brand`, `views`, `ux`, and `visual-anchors` are implemented through `scripts/generate-canonical.mjs`. The `visuals` subskill is implemented through `scripts/generate-visual-references.mjs` for prompt, candidate, and selected-reference records.
+
+Pencil, design-system, prototype, handoff, reconcile, eval, and skill optimization subskills remain contract-only in Stage 07.

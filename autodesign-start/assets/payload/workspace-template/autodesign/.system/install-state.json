@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "stage": "06-canonical-pipeline",
+  "stage": "07-visual-reference-gates",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
-  "runtime": "bootstrap-state-subskill-contracts-and-canonical-pipeline",
+  "runtime": "bootstrap-state-subskill-contracts-canonical-pipeline-and-visual-reference-gates",
   "materializedBy": "autodesign-start/assets/payload/scripts/bootstrap.mjs",
   "stateScripts": {
     "validateState": "autodesign-start/assets/payload/scripts/validate-state.mjs",
@@ -11,7 +11,8 @@
     "canRunSubskill": "autodesign-start/assets/payload/scripts/can-run-subskill.mjs",
     "recordGate": "autodesign-start/assets/payload/scripts/record-gate.mjs",
     "dirtyArtifacts": "autodesign-start/assets/payload/scripts/dirty-artifacts.mjs",
-    "generateCanonical": "autodesign-start/assets/payload/scripts/generate-canonical.mjs"
+    "generateCanonical": "autodesign-start/assets/payload/scripts/generate-canonical.mjs",
+    "generateVisualReferences": "autodesign-start/assets/payload/scripts/generate-visual-references.mjs"
   },
   "approvalGates": {
     "applyRequires": [
@@ -22,6 +23,24 @@
     ],
     "canonicalGenerationRequires": [
       "--approve-canonical-generation",
+      "--actor",
+      "--at"
+    ],
+    "visualPromptRequires": [
+      "--approve-visual-prompts",
+      "--actor",
+      "--at"
+    ],
+    "visualCandidateRequires": [
+      "--approve-visual-candidates",
+      "--actor",
+      "--at",
+      "canonical.visual-anchor-selection.approved",
+      "generated-output-path-exists"
+    ],
+    "visualReferenceSelectionRequires": [
+      "--approve-visual-reference-selection",
+      "--reference-id",
       "--actor",
       "--at"
     ]
@@ -41,9 +60,9 @@
   ],
   "disabledBehaviors": {
     "canonicalGeneration": false,
-    "imageGeneration": true,
+    "imageGeneration": false,
     "pencilOperations": true,
-    "visualReferenceGeneration": true,
+    "visualReferenceGeneration": false,
     "designSystemGeneration": true,
     "prototypeGeneration": true,
     "handoff": true,

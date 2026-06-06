@@ -1,6 +1,6 @@
 # Payload Scripts
 
-Stage 06 includes deterministic bootstrap, state-management, subskill readiness, and canonical generation scripts.
+Stage 07 includes deterministic bootstrap, state-management, subskill readiness, canonical generation, and visual reference gate scripts.
 
 ## Bootstrap
 
@@ -72,4 +72,36 @@ node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace 
 
 Use `--subskill interview`, `stories`, `brand`, `views`, `ux`, or `visual-anchors` to generate a bounded canonical subset. UX and visual-anchor generation require explicit platform selection in project inputs.
 
-Stage 06 generation creates canonical artifacts and updates manifest/graph state only. It does not create images, Pencil files, visual references, design-system outputs, prototypes, handoffs, reports, optimization artifacts, or downstream phase artifacts.
+Canonical generation creates canonical artifacts and updates manifest/graph state only. It does not create images, Pencil files, design-system outputs, prototypes, handoffs, reports, optimization artifacts, or downstream phase artifacts.
+
+## Visual Reference Gates
+
+Plan visual prompt records from generated canonical visual anchor proposals:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action prompts --plan
+```
+
+Apply visual prompt records only with explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action prompts --apply --approve-visual-prompts --actor <actor> --at <timestamp>
+```
+
+Prompt records include prompt text, an active-agent image-generation instruction, generated output path fields initialized as empty, and review metadata. The script does not create images or name an image model.
+
+After the active agent generates a real image file, record candidates by referencing the applied prompt and the existing generated output path:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action candidates --prompt-id <prompt-id> --generated-output-path autodesign/outputs/visual-references/generated/<file>.png --apply --approve-visual-candidates --actor <actor> --at <timestamp>
+```
+
+Candidate recording requires `canonical.visual-anchor-selection` to be manually approved and validates that every generated output path exists as an image file inside the workspace. It records paths and metadata only; it does not fake image generation.
+
+Select references only by explicit candidate id and explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action selection --reference-id <candidate-id> --apply --approve-visual-reference-selection --actor <actor> --at <timestamp>
+```
+
+The selection action never auto-selects references.

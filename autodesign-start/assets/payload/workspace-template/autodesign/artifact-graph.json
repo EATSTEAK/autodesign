@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "06-canonical-pipeline",
+  "stage": "07-visual-reference-gates",
   "graphId": "autodesign-default-artifact-graph",
   "artifacts": [
     {
@@ -19,7 +19,7 @@
           "sourceNotes"
         ],
         "mayChange": [],
-        "notes": "User-provided source material is preserved and used by deterministic Stage 06 canonical generation."
+        "notes": "User-provided source material is preserved and used by deterministic canonical generation."
       }
     },
     {
@@ -314,9 +314,9 @@
       }
     },
     {
-      "id": "visual.reference-set",
+      "id": "visual.reference-prompts",
       "kind": "visual-reference",
-      "path": "autodesign/outputs/visual-references",
+      "path": "autodesign/outputs/visual-references/prompt-records.json",
       "sourceOfTruth": false,
       "generated": false,
       "referenceOnly": true,
@@ -330,6 +330,79 @@
       "reconcile": {
         "policy": "may-change",
         "preserve": [
+          "approvedPromptText",
+          "manualReviewNotes"
+        ],
+        "mayChange": [
+          "promptRecords",
+          "activeAgentInstructions"
+        ],
+        "notes": "Prompt records are generated from canonical visual anchor proposals and do not create images."
+      }
+    },
+    {
+      "id": "visual.reference-candidates",
+      "kind": "visual-reference",
+      "path": "autodesign/outputs/visual-references/candidate-records.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "visual.reference-prompts"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "generatedOutputPaths",
+          "reviewMetadata",
+          "manualReviewNotes"
+        ],
+        "mayChange": [
+          "candidateRecords",
+          "reviewStatus"
+        ],
+        "notes": "Candidate records persist externally generated image paths and review metadata; scripts do not fake image generation."
+      }
+    },
+    {
+      "id": "visual.reference-selection",
+      "kind": "visual-reference",
+      "path": "autodesign/outputs/visual-references/selected-references.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "visual.reference-candidates"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "explicitUserApproval",
+          "selectedReferenceIds",
+          "manualReviewNotes"
+        ],
+        "mayChange": [
+          "selectionSummary"
+        ],
+        "notes": "Selected references require explicit user approval and are never auto-selected."
+      }
+    },
+    {
+      "id": "visual.reference-set",
+      "kind": "visual-reference",
+      "path": "autodesign/outputs/visual-references",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "visual.reference-selection"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
           "approvedDirection",
           "manualReviewNotes"
         ],
@@ -338,7 +411,7 @@
           "compositionTargets",
           "styleExplorations"
         ],
-        "notes": "Visual references are downstream targets only; Stage 06 does not generate them."
+        "notes": "The visual reference set is available only after explicit selected-reference approval."
       }
     },
     {
@@ -366,7 +439,7 @@
           "frameStructure",
           "visualBindings"
         ],
-        "notes": "Wireframe output is a downstream target only in Stage 06."
+        "notes": "Wireframe output remains a later-stage downstream target in Stage 07."
       }
     },
     {
@@ -392,7 +465,7 @@
           "typePrimitives",
           "spacingPrimitives"
         ],
-        "notes": "Primitive design tokens are downstream targets only in Stage 06."
+        "notes": "Primitive design tokens remain later-stage downstream targets in Stage 07."
       }
     },
     {
@@ -419,7 +492,7 @@
           "semanticTokens",
           "implementationNotes"
         ],
-        "notes": "Design-system token output is not generated in Stage 06."
+        "notes": "Design-system token output is not generated in Stage 07."
       }
     },
     {
@@ -448,7 +521,7 @@
           "interactionBindings",
           "previewMetadata"
         ],
-        "notes": "Prototype package is a downstream target only in Stage 06."
+        "notes": "Prototype package remains a later-stage downstream target in Stage 07."
       }
     },
     {
@@ -486,7 +559,7 @@
           "exportedArtifacts",
           "deliveryChecklist"
         ],
-        "notes": "Handoff package is a downstream target only in Stage 06."
+        "notes": "Handoff package remains a later-stage downstream target in Stage 07."
       }
     },
     {

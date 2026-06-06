@@ -1,5 +1,5 @@
 # Autodesign Logs
 
-Stage 06 creates `decision-log.json` as part of canonical generation.
+Canonical generation creates `decision-log.json`.
 
-Reconcile, eval, and skill optimization reports remain later-stage outputs and are not generated in Stage 06.
+Reconcile, eval, and skill optimization reports remain later-stage outputs and are not generated in Stage 07.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "06-canonical-pipeline",
+  "stage": "07-visual-reference-gates",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
   "workspace": {
@@ -24,6 +24,9 @@
       "canonical.visual-anchor-proposals"
     ],
     "referencesOnly": [
+      "visual.reference-prompts",
+      "visual.reference-candidates",
+      "visual.reference-selection",
       "visual.reference-set",
       "pencil.wireframe-set",
       "design-system.primitives",
@@ -282,9 +285,9 @@
     {
       "name": "visuals",
       "path": "subskills/autodesign-visuals/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "canonical.brand-direction",
         "canonical.screen-model",
@@ -292,27 +295,33 @@
         "canonical.visual-anchor-proposals"
       ],
       "outputArtifacts": [
+        "visual.reference-prompts",
+        "visual.reference-candidates",
+        "visual.reference-selection",
         "visual.reference-set"
       ],
-      "outputFiles": [],
+      "outputFiles": [
+        "autodesign/outputs/visual-references/prompt-records.json",
+        "autodesign/outputs/visual-references/candidate-records.json",
+        "autodesign/outputs/visual-references/selected-references.json"
+      ],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "canonical-visual-anchors.generated",
+        "visual-reference-generation.enabled"
       ],
-      "disabledBehaviors": [
-        "imageGeneration",
-        "visualReferenceGeneration",
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
-        "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
+        "Stop if canonical visual anchor proposals are absent or not marked generated.",
+        "Run scripts/generate-visual-references.mjs in plan mode before apply.",
+        "Do not create image files in the script; record only real generated output paths.",
+        "Stop candidate recording unless canonical.visual-anchor-selection is manually approved.",
+        "Stop selected-reference recording unless explicit user approval is supplied."
       ]
     },
     {
@@ -682,7 +691,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Canonical generation is implemented for Stage 06 deterministic artifacts.",
+      "note": "Canonical generation remains available for Stage 07 upstream repair.",
       "history": []
     },
     {
@@ -720,19 +729,80 @@
       "history": []
     },
     {
-      "id": "image.generation",
-      "status": "not-implemented",
+      "id": "visual.reference-prompts",
+      "status": "pending",
       "required": true,
-      "implemented": false,
+      "implemented": true,
       "scope": [
-        "visual-reference"
+        "visual.reference-prompts"
       ],
       "requires": [
-        "later-stage"
+        "--approve-visual-prompts",
+        "--actor",
+        "--at",
+        "canonical.visual-anchor-proposals.generated"
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Image generation is outside Stage 06.",
+      "note": "Visual prompt records require generated canonical visual anchor proposals and do not generate images.",
+      "history": []
+    },
+    {
+      "id": "visual.reference-candidate-generation",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "visual.reference-candidates"
+      ],
+      "requires": [
+        "--approve-visual-candidates",
+        "--actor",
+        "--at",
+        "canonical.visual-anchor-selection.approved",
+        "generated-output-path-exists"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Candidate records require manual anchor approval and real generated output paths.",
+      "history": []
+    },
+    {
+      "id": "visual.reference-selection",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "visual.reference-selection",
+        "visual.reference-set"
+      ],
+      "requires": [
+        "--approve-visual-reference-selection",
+        "--reference-id",
+        "--actor",
+        "--at",
+        "explicit-user-approval"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Selected visual references require explicit user approval and are never auto-selected.",
+      "history": []
+    },
+    {
+      "id": "image.generation",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "visual.reference-candidates"
+      ],
+      "requires": [
+        "active-agent-image-generation-instruction",
+        "generated-output-path-exists"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Stage 07 records active-agent image-generation instructions and generated output paths, but scripts do not create or fake images.",
       "history": []
     },
     {
@@ -748,7 +818,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Pencil operations are outside Stage 06.",
+      "note": "Pencil operations are outside Stage 07.",
       "history": []
     },
     {
@@ -764,7 +834,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Design-system generation is outside Stage 06.",
+      "note": "Design-system generation is outside Stage 07.",
       "history": []
     },
     {
@@ -780,7 +850,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Prototype generation is outside Stage 06.",
+      "note": "Prototype generation is outside Stage 07.",
       "history": []
     },
     {
@@ -796,26 +866,28 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Handoff export is outside Stage 06.",
+      "note": "Handoff export is outside Stage 07.",
       "history": []
     }
   ],
   "approvalRecords": [],
   "disabledBehaviors": {
     "canonicalGeneration": false,
-    "imageGeneration": true,
+    "imageGeneration": false,
     "pencilOperations": true,
-    "visualReferenceGeneration": true,
+    "visualReferenceGeneration": false,
     "designSystemGeneration": true,
     "prototypeGeneration": true,
     "handoff": true,
     "realSubskillPhaseBehavior": true
   },
   "notes": [
-    "Stage 06 enables deterministic canonical generation from real project input files.",
+    "Stage 07 enables visual reference prompt, candidate, and selection records after generated canonical visual anchor proposals.",
     "UX platform selection is a hard gate for UX rules, interaction model, screen-state matrix, and visual anchor proposals.",
     "Primary visual anchor proposals are planning-only and are not auto-approved.",
-    "No image generation, Pencil operations, visual reference generation, design-system outputs, prototypes, or handoff packages are generated in Stage 06."
+    "Candidate recording requires manual visual anchor approval and real generated output paths.",
+    "Selected references require explicit user approval and are never auto-selected.",
+    "No Pencil operations, design-system outputs, prototypes, or handoff packages are generated in Stage 07."
   ],
   "generationRecords": []
 }

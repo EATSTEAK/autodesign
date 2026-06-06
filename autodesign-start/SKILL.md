@@ -1,6 +1,6 @@
 ---
 name: autodesign-start
-description: Start Autodesign setup from the eatsteak/autodesign skill package. Use when the user asks to initialize, start, install-check, bootstrap, validate state, inspect the artifact graph, check subskill readiness, record gates, compute dirty artifacts, or generate Stage 06 canonical artifacts. Do not run image, Pencil, visual-reference, design-system, prototype, or handoff generation.
+description: Start Autodesign setup from the eatsteak/autodesign skill package. Use when the user asks to initialize, start, install-check, bootstrap, validate state, inspect the artifact graph, check subskill readiness, record gates, compute dirty artifacts, generate canonical artifacts, or run Stage 07 visual reference gates. Do not run Pencil, design-system, prototype, or handoff generation.
 ---
 
 # Autodesign Start
@@ -9,9 +9,9 @@ This is the only public skill exposed by the `eatsteak/autodesign` package at in
 
 ## Current Stage
 
-Stage 06 provides a one-shot bootstrap runtime that materializes the bundled Autodesign workspace template into a target project, deterministic manifest and artifact graph state-management scripts, private subskill readiness checks, and canonical artifact generation from real project input files.
+Stage 07 provides a one-shot bootstrap runtime that materializes the bundled Autodesign workspace template into a target project, deterministic manifest and artifact graph state-management scripts, private subskill readiness checks, canonical artifact generation from real project input files, and visual reference prompt/candidate/selection record gates.
 
-Allowed generation is limited to canonical planning artifacts: project brief/interview intent, stories/requirements, brand direction, UX rules, screen model, interaction model, coverage matrix, decision log, navigation, screen-state matrix, and primary visual anchor proposals. Do not create Pencil files, call image generation, run design-system logic, generate visual references, generate prototypes, hand off to another phase, generate reports, optimize skills, or execute downstream phase behavior from this skill.
+Allowed file generation is limited to canonical planning artifacts and Stage 07 visual reference records. Visual reference records may instruct the active agent to generate real images and may persist real generated output paths, but the script must not create image files, name a specific image model, or fake image generation. Do not create Pencil files, run design-system logic, generate prototypes, hand off to another phase, generate reports, optimize skills, or execute later downstream phase behavior from this skill.
 
 ## Bundled Payload
 
@@ -20,12 +20,13 @@ Runtime assets live under `assets/payload/`:
 - `subskills/` for private Autodesign subskill contracts.
 - `schemas/` for manifest and artifact graph JSON schema files.
 - `scripts/bootstrap.mjs` for deterministic plan/apply workspace materialization.
-- `scripts/generate-canonical.mjs` for deterministic Stage 06 canonical artifact generation and manifest/graph updates.
-- `scripts/validate-state.mjs`, `scripts/check-dependencies.mjs`, `scripts/can-run-subskill.mjs`, `scripts/record-gate.mjs`, and `scripts/dirty-artifacts.mjs` for Stage 06 state and contract readiness management.
+- `scripts/generate-canonical.mjs` for deterministic canonical artifact generation and manifest/graph updates.
+- `scripts/generate-visual-references.mjs` for Stage 07 visual reference prompt, candidate, and selected-reference records.
+- `scripts/validate-state.mjs`, `scripts/check-dependencies.mjs`, `scripts/can-run-subskill.mjs`, `scripts/record-gate.mjs`, and `scripts/dirty-artifacts.mjs` for state and contract readiness management.
 - `hooks/` for no-op lifecycle hook adapters.
 - `workspace-template/` for files materialized by the bootstrap runtime.
 
-Read `assets/payload/payload-manifest.json` for the concrete Stage 06 payload inventory.
+Read `assets/payload/payload-manifest.json` for the concrete Stage 07 payload inventory.
 
 ## Bootstrap Command
 
@@ -103,9 +104,37 @@ node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace 
 
 Generation reads real files from `autodesign/inputs`. UX rules, interaction model, screen-state matrix, and visual anchor proposals are blocked unless project inputs include explicit platform selection. Primary visual anchor proposals are emitted as unapproved proposals only.
 
+## Visual Reference Gates
+
+Prompt records require generated canonical visual anchor proposals:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action prompts --plan
+```
+
+Apply prompt records only with explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action prompts --apply --approve-visual-prompts --actor <actor> --at <timestamp>
+```
+
+Candidate records require a manually approved `canonical.visual-anchor-selection` gate and real generated image paths:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action candidates --prompt-id <prompt-id> --generated-output-path <path> --apply --approve-visual-candidates --actor <actor> --at <timestamp>
+```
+
+Selected references require explicit reference ids and approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action selection --reference-id <candidate-id> --apply --approve-visual-reference-selection --actor <actor> --at <timestamp>
+```
+
+The visual reference script never auto-selects references and never creates image files.
+
 ## Materialized Files
 
-The bootstrap runtime copies `assets/payload/workspace-template/` into the target project. Stage 06 materializes:
+The bootstrap runtime copies `assets/payload/workspace-template/` into the target project. Stage 07 materializes:
 
 - `AGENTS.md`
 - `.codex/config.toml`
@@ -123,5 +152,6 @@ The bootstrap runtime copies `assets/payload/workspace-template/` into the targe
 3. Run the plan command against the requested target workspace.
 4. Report planned file actions and approval gates.
 5. Apply only with the explicit approval flags described above.
-6. For private subskill requests, run `can-run-subskill.mjs` and report readiness. Do not run real phase behavior.
+6. For private subskill requests, run `can-run-subskill.mjs` and report readiness before any apply command.
 7. For canonical generation requests, run `generate-canonical.mjs --plan` first and apply only with `--approve-canonical-generation --actor <actor> --at <timestamp>`.
+8. For visual reference requests, run `generate-visual-references.mjs --plan` first. Apply prompt, candidate, or selection records only with that action's explicit approval flag.

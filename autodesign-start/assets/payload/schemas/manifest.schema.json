@@ -203,6 +203,9 @@
               "disabled-behaviors.enforced",
               "canonical-generation.enabled",
               "platform-selection.present",
+              "canonical-visual-anchors.generated",
+              "canonical-visual-anchor-selection.approved",
+              "visual-reference-generation.enabled",
               "no-real-phase-behavior"
             ]
           },

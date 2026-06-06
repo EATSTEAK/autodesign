@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "06-canonical-pipeline",
+  "stage": "07-visual-reference-gates",
   "publicSkills": [
     "autodesign-start"
   ],
@@ -74,6 +74,45 @@
       "requiresApproval": [
         "--approve-canonical-generation"
       ]
+    },
+    {
+      "name": "generate-visual-prompts-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace <workspace> --action prompts --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "generate-visual-prompts-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace <workspace> --action prompts --apply --approve-visual-prompts --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-visual-prompts"
+      ]
+    },
+    {
+      "name": "record-visual-candidate-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace <workspace> --action candidates --prompt-id <prompt-id> --generated-output-path <path> --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "record-visual-candidate-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace <workspace> --action candidates --prompt-id <prompt-id> --generated-output-path <path> --apply --approve-visual-candidates --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-visual-candidates"
+      ]
+    },
+    {
+      "name": "select-visual-reference-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace <workspace> --action selection --reference-id <candidate-id> --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "select-visual-reference-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace <workspace> --action selection --reference-id <candidate-id> --apply --approve-visual-reference-selection --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-visual-reference-selection"
+      ]
     }
   ],
   "payload": {
@@ -112,8 +151,8 @@
       },
       {
         "path": "subskills/autodesign-visuals/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private visuals subskill contract for visual.reference-set."
+        "status": "implemented",
+        "purpose": "Private visuals subskill contract for Stage 07 prompt, candidate, and selected reference records."
       },
       {
         "path": "subskills/autodesign-views/SKILL.md",
@@ -173,14 +212,19 @@
       {
         "path": "subskills/autodesign-phase-placeholder/SKILL.md",
         "status": "legacy-placeholder",
-        "purpose": "Stage 04 placeholder retained for compatibility; concrete Stage 06 contracts are listed above."
+        "purpose": "Stage 04 placeholder retained for compatibility; concrete Stage 07 contracts are listed above."
       }
     ],
     "scripts": [
       {
         "path": "scripts/generate-canonical.mjs",
         "status": "implemented",
-        "purpose": "Deterministic Stage 06 canonical artifact generator and manifest/graph state updater."
+        "purpose": "Deterministic canonical artifact generator and manifest/graph state updater."
+      },
+      {
+        "path": "scripts/generate-visual-references.mjs",
+        "status": "implemented",
+        "purpose": "Stage 07 visual reference prompt, candidate, and selected-reference record workflow."
       },
       {
         "path": "scripts/bootstrap.mjs",
@@ -195,7 +239,7 @@
       {
         "path": "scripts/validate-state.mjs",
         "status": "implemented",
-        "purpose": "Validate manifest and artifact graph JSON plus Stage 06 semantic constraints."
+        "purpose": "Validate manifest and artifact graph JSON plus Stage 07 semantic constraints."
       },
       {
         "path": "scripts/check-dependencies.mjs",
@@ -254,13 +298,31 @@
       "--approve-canonical-generation",
       "--actor",
       "--at"
+    ],
+    "visualPromptRequires": [
+      "--approve-visual-prompts",
+      "--actor",
+      "--at"
+    ],
+    "visualCandidateRequires": [
+      "--approve-visual-candidates",
+      "--actor",
+      "--at",
+      "canonical.visual-anchor-selection.approved",
+      "generated-output-path-exists"
+    ],
+    "visualReferenceSelectionRequires": [
+      "--approve-visual-reference-selection",
+      "--reference-id",
+      "--actor",
+      "--at"
     ]
   },
   "disabledBehaviors": {
     "canonicalGeneration": false,
-    "imageGeneration": true,
+    "imageGeneration": false,
     "pencilOperations": true,
-    "visualReferenceGeneration": true,
+    "visualReferenceGeneration": false,
     "designSystemGeneration": true,
     "prototypeGeneration": true,
     "handoff": true,
@@ -268,8 +330,10 @@
   },
   "notes": [
     "autodesign-start is the only public skill at install time.",
-    "Stage 06 implements deterministic canonical generation from real project input files.",
+    "Stage 07 keeps deterministic canonical generation available and implements visual reference prompt, candidate, and selected-reference records.",
     "Primary visual anchor proposals are planning-only and are not auto-approved.",
-    "No image generation, Pencil operation, visual reference generation, design-system work, prototype generation, handoff, reconcile report generation, eval report generation, skill optimization, or downstream phase behavior is implemented."
+    "Candidate records require manually approved visual anchors and real generated image output paths.",
+    "Selected references require explicit user approval and cannot be auto-selected.",
+    "No Pencil operation, design-system work, prototype generation, handoff, reconcile report generation, eval report generation, or skill optimization is implemented."
   ]
 }
