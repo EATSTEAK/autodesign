@@ -1,6 +1,6 @@
 ---
 name: autodesign-reconcile
-description: Private Stage 05 contract for the Autodesign reconcile subskill. Contract-only; checks prerequisites and does not generate reports.
+description: Private Stage 06 contract for the Autodesign reconcile subskill. Contract-only; checks prerequisites and does not generate reports.
 ---
 
 # Autodesign Reconcile Contract
@@ -25,7 +25,7 @@ This private payload subskill is not public. Enter it only through `autodesign-s
 
 - `log.reconcile-report` at `autodesign/logs/reconcile-report.json`
 
-Stage 05 declares this output only. Do not create or update it.
+Stage 06 declares this output only. Do not create or update it.
 
 ## Hard Gates
 

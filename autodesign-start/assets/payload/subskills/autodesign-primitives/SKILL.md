@@ -1,6 +1,6 @@
 ---
 name: autodesign-primitives
-description: Private Stage 05 contract for the Autodesign primitives subskill. Contract-only; checks prerequisites and does not generate design-system artifacts.
+description: Private Stage 06 contract for the Autodesign primitives subskill. Contract-only; checks prerequisites and does not generate design-system artifacts.
 ---
 
 # Autodesign Primitives Contract
@@ -16,7 +16,7 @@ This private payload subskill is not public. Enter it only through `autodesign-s
 
 - `design-system.primitives` at `autodesign/outputs/design-system/primitives.json`
 
-Stage 05 declares this output only. Do not create or update it.
+Stage 06 declares this output only. Do not create or update it.
 
 ## Hard Gates
 

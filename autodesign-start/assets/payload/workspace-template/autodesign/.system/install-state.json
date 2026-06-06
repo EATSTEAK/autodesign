@@ -1,16 +1,17 @@
 {
   "schemaVersion": 1,
-  "stage": "05-subskill-contracts",
+  "stage": "06-canonical-pipeline",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
-  "runtime": "bootstrap-state-and-subskill-contracts",
+  "runtime": "bootstrap-state-subskill-contracts-and-canonical-pipeline",
   "materializedBy": "autodesign-start/assets/payload/scripts/bootstrap.mjs",
   "stateScripts": {
     "validateState": "autodesign-start/assets/payload/scripts/validate-state.mjs",
     "checkDependencies": "autodesign-start/assets/payload/scripts/check-dependencies.mjs",
     "canRunSubskill": "autodesign-start/assets/payload/scripts/can-run-subskill.mjs",
     "recordGate": "autodesign-start/assets/payload/scripts/record-gate.mjs",
-    "dirtyArtifacts": "autodesign-start/assets/payload/scripts/dirty-artifacts.mjs"
+    "dirtyArtifacts": "autodesign-start/assets/payload/scripts/dirty-artifacts.mjs",
+    "generateCanonical": "autodesign-start/assets/payload/scripts/generate-canonical.mjs"
   },
   "approvalGates": {
     "applyRequires": [
@@ -18,6 +19,11 @@
     ],
     "overwriteRequires": [
       "--approve-overwrite"
+    ],
+    "canonicalGenerationRequires": [
+      "--approve-canonical-generation",
+      "--actor",
+      "--at"
     ]
   },
   "materializedFiles": [
@@ -34,7 +40,7 @@
     "autodesign/logs/README.md"
   ],
   "disabledBehaviors": {
-    "canonicalGeneration": true,
+    "canonicalGeneration": false,
     "imageGeneration": true,
     "pencilOperations": true,
     "visualReferenceGeneration": true,

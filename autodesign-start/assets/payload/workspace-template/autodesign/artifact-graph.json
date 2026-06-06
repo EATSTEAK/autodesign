@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "05-subskill-contracts",
+  "stage": "06-canonical-pipeline",
   "graphId": "autodesign-default-artifact-graph",
   "artifacts": [
     {
@@ -19,7 +19,7 @@
           "sourceNotes"
         ],
         "mayChange": [],
-        "notes": "User-provided source material is preserved."
+        "notes": "User-provided source material is preserved and used by deterministic Stage 06 canonical generation."
       }
     },
     {
@@ -36,15 +36,16 @@
       "reconcile": {
         "policy": "may-change",
         "preserve": [
-          "approvedDecisions",
+          "approvedBrief",
           "manualAnnotations"
         ],
         "mayChange": [
           "summary",
           "constraints",
-          "openQuestions"
+          "openQuestions",
+          "interviewIntent"
         ],
-        "notes": "Project-brief content is a later-stage output target."
+        "notes": "Project brief and interview intent are generated from project input files."
       }
     },
     {
@@ -65,11 +66,12 @@
           "manualAnnotations"
         ],
         "mayChange": [
+          "stories",
           "functionalRequirements",
           "nonFunctionalRequirements",
           "priorityNotes"
         ],
-        "notes": "Requirements and user stories are later-stage output targets."
+        "notes": "Requirements and user stories are generated from the project brief."
       }
     },
     {
@@ -95,7 +97,32 @@
           "tone",
           "visualPrinciples"
         ],
-        "notes": "Brand direction is a later-stage source-of-truth target."
+        "notes": "Brand direction is generated from brief and requirements."
+      }
+    },
+    {
+      "id": "canonical.ux-rules",
+      "kind": "canonical",
+      "path": "autodesign/outputs/canonical/ux-rules.json",
+      "sourceOfTruth": true,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "canonical.project-brief",
+        "canonical.requirements"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedUxRules",
+          "manualAnnotations"
+        ],
+        "mayChange": [
+          "platformSelectionGate",
+          "rules"
+        ],
+        "notes": "UX rules are generated only when platform selection is present in project inputs."
       }
     },
     {
@@ -117,10 +144,34 @@
         ],
         "mayChange": [
           "screens",
-          "navigation",
+          "viewTaxonomy",
           "contentInventory"
         ],
-        "notes": "Screen model changes follow requirements changes."
+        "notes": "View taxonomy and screen model are generated from requirements."
+      }
+    },
+    {
+      "id": "canonical.navigation",
+      "kind": "canonical",
+      "path": "autodesign/outputs/canonical/navigation.json",
+      "sourceOfTruth": true,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "canonical.screen-model"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedNavigation",
+          "manualAnnotations"
+        ],
+        "mayChange": [
+          "items",
+          "primaryPath"
+        ],
+        "notes": "Navigation model is generated from the canonical screen model."
       }
     },
     {
@@ -132,6 +183,7 @@
       "referenceOnly": false,
       "required": true,
       "upstreamDependencies": [
+        "canonical.ux-rules",
         "canonical.screen-model"
       ],
       "reconcile": {
@@ -145,7 +197,120 @@
           "transitions",
           "edgeCases"
         ],
-        "notes": "Interaction semantics may change when the screen model changes."
+        "notes": "Interaction semantics are generated from UX rules and screen model."
+      }
+    },
+    {
+      "id": "canonical.screen-state-matrix",
+      "kind": "canonical",
+      "path": "autodesign/outputs/canonical/screen-state-matrix.json",
+      "sourceOfTruth": true,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "canonical.screen-model",
+        "canonical.interaction-model"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedStates",
+          "manualAnnotations"
+        ],
+        "mayChange": [
+          "defaultStates",
+          "loadingStates",
+          "emptyStates",
+          "errorStates"
+        ],
+        "notes": "Screen state matrix is generated from screen and interaction models."
+      }
+    },
+    {
+      "id": "canonical.coverage-matrix",
+      "kind": "canonical",
+      "path": "autodesign/outputs/canonical/coverage-matrix.json",
+      "sourceOfTruth": true,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "canonical.requirements",
+        "canonical.screen-model",
+        "canonical.interaction-model",
+        "canonical.screen-state-matrix"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "acceptedCoverage",
+          "manualAnnotations"
+        ],
+        "mayChange": [
+          "rows",
+          "gaps"
+        ],
+        "notes": "Coverage matrix maps requirements to stories, screens, states, and decisions."
+      }
+    },
+    {
+      "id": "canonical.visual-anchor-proposals",
+      "kind": "canonical",
+      "path": "autodesign/outputs/canonical/visual-anchor-proposals.json",
+      "sourceOfTruth": true,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "canonical.brand-direction",
+        "canonical.screen-model",
+        "canonical.interaction-model"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "manualAnchorSelection",
+          "approvalNotes"
+        ],
+        "mayChange": [
+          "proposals"
+        ],
+        "notes": "Primary visual anchor proposals are planning-only and are never auto-approved."
+      }
+    },
+    {
+      "id": "log.decision-log",
+      "kind": "log",
+      "path": "autodesign/logs/decision-log.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "inputs.project-material",
+        "canonical.project-brief",
+        "canonical.requirements",
+        "canonical.brand-direction",
+        "canonical.ux-rules",
+        "canonical.screen-model",
+        "canonical.interaction-model",
+        "canonical.coverage-matrix",
+        "canonical.navigation",
+        "canonical.screen-state-matrix",
+        "canonical.visual-anchor-proposals"
+      ],
+      "reconcile": {
+        "policy": "preserve",
+        "preserve": [
+          "manualReviewNotes",
+          "approvalHistory"
+        ],
+        "mayChange": [
+          "generatedDecisions",
+          "pendingDecisions"
+        ],
+        "notes": "Decision log is generated and updated by the canonical pipeline."
       }
     },
     {
@@ -159,7 +324,8 @@
       "upstreamDependencies": [
         "canonical.brand-direction",
         "canonical.screen-model",
-        "canonical.interaction-model"
+        "canonical.interaction-model",
+        "canonical.visual-anchor-proposals"
       ],
       "reconcile": {
         "policy": "may-change",
@@ -172,7 +338,7 @@
           "compositionTargets",
           "styleExplorations"
         ],
-        "notes": "Visual references are downstream targets only; Stage 05 does not generate them."
+        "notes": "Visual references are downstream targets only; Stage 06 does not generate them."
       }
     },
     {
@@ -185,7 +351,8 @@
       "required": false,
       "upstreamDependencies": [
         "canonical.screen-model",
-        "canonical.interaction-model"
+        "canonical.interaction-model",
+        "canonical.screen-state-matrix"
       ],
       "reconcile": {
         "policy": "may-change",
@@ -199,7 +366,7 @@
           "frameStructure",
           "visualBindings"
         ],
-        "notes": "Wireframe output is a downstream target only in Stage 05."
+        "notes": "Wireframe output is a downstream target only in Stage 06."
       }
     },
     {
@@ -225,7 +392,7 @@
           "typePrimitives",
           "spacingPrimitives"
         ],
-        "notes": "Primitive design tokens are downstream targets only in Stage 05."
+        "notes": "Primitive design tokens are downstream targets only in Stage 06."
       }
     },
     {
@@ -252,7 +419,7 @@
           "semanticTokens",
           "implementationNotes"
         ],
-        "notes": "Design-system token output is not generated in Stage 05."
+        "notes": "Design-system token output is not generated in Stage 06."
       }
     },
     {
@@ -266,6 +433,7 @@
       "upstreamDependencies": [
         "canonical.screen-model",
         "canonical.interaction-model",
+        "canonical.screen-state-matrix",
         "pencil.wireframe-set",
         "design-system.tokens"
       ],
@@ -280,7 +448,7 @@
           "interactionBindings",
           "previewMetadata"
         ],
-        "notes": "Prototype package is a downstream target only in Stage 05."
+        "notes": "Prototype package is a downstream target only in Stage 06."
       }
     },
     {
@@ -295,8 +463,14 @@
         "canonical.project-brief",
         "canonical.requirements",
         "canonical.brand-direction",
+        "canonical.ux-rules",
         "canonical.screen-model",
+        "canonical.navigation",
         "canonical.interaction-model",
+        "canonical.screen-state-matrix",
+        "canonical.coverage-matrix",
+        "canonical.visual-anchor-proposals",
+        "log.decision-log",
         "visual.reference-set",
         "pencil.wireframe-set",
         "design-system.tokens",
@@ -312,7 +486,7 @@
           "exportedArtifacts",
           "deliveryChecklist"
         ],
-        "notes": "Handoff package is a downstream target only in Stage 05."
+        "notes": "Handoff package is a downstream target only in Stage 06."
       }
     },
     {
@@ -328,8 +502,14 @@
         "canonical.project-brief",
         "canonical.requirements",
         "canonical.brand-direction",
+        "canonical.ux-rules",
         "canonical.screen-model",
         "canonical.interaction-model",
+        "canonical.coverage-matrix",
+        "canonical.navigation",
+        "canonical.screen-state-matrix",
+        "canonical.visual-anchor-proposals",
+        "log.decision-log",
         "visual.reference-set",
         "pencil.wireframe-set",
         "design-system.tokens",

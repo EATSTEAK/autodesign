@@ -1,9 +1,9 @@
 ---
 name: autodesign-views
-description: Private Stage 05 contract for the Autodesign views subskill. Contract-only; checks prerequisites and does not generate artifacts.
+description: Private Stage 06 canonical subskill for view taxonomy, screen model, navigation, and coverage generation.
 ---
 
-# Autodesign Views Contract
+# Autodesign Views
 
 This private payload subskill is not public. Enter it only through `autodesign-start` or a later orchestrator after running the deterministic readiness check.
 
@@ -14,14 +14,28 @@ This private payload subskill is not public. Enter it only through `autodesign-s
 ## Output Artifacts
 
 - `canonical.screen-model` at `autodesign/outputs/canonical/screen-model.json`
+- `canonical.navigation` at `autodesign/outputs/canonical/navigation.json`
+- `canonical.coverage-matrix` at `autodesign/outputs/canonical/coverage-matrix.json`
+- `log.decision-log` at `autodesign/logs/decision-log.json`
 
-Stage 05 declares this output only. Do not create or update it.
+## Deterministic Script
+
+Plan first:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace <workspace> --subskill views --plan
+```
+
+Apply only with explicit approval and deterministic record metadata:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace <workspace> --subskill views --apply --approve-canonical-generation --actor <actor> --at <timestamp>
+```
 
 ## Hard Gates
 
 - `scripts/can-run-subskill.mjs --workspace <workspace> --subskill views` must pass.
-- `manifest.disabledBehaviors.canonicalGeneration` must be `true`.
-- `manifest.disabledBehaviors.realSubskillPhaseBehavior` must be `true`.
+- `manifest.disabledBehaviors.canonicalGeneration` must be `false`.
 - The artifact graph must contain every required upstream and output artifact id.
 
 ## Fail Fast
@@ -29,4 +43,4 @@ Stage 05 declares this output only. Do not create or update it.
 - Stop if state validation fails.
 - Stop if graph dependencies are missing or cyclic.
 - Stop if `canonical.requirements` is missing at its graph path.
-- If all gates pass, report contract-only status and stop before view or screen-model generation.
+- Do not create images, Pencil files, visual references, design-system outputs, prototypes, or handoff material.

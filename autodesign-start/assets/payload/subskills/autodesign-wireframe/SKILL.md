@@ -1,6 +1,6 @@
 ---
 name: autodesign-wireframe
-description: Private Stage 05 contract for the Autodesign wireframe subskill. Contract-only; checks prerequisites and does not use Pencil.
+description: Private Stage 06 contract for the Autodesign wireframe subskill. Contract-only; checks prerequisites and does not use Pencil.
 ---
 
 # Autodesign Wireframe Contract
@@ -16,7 +16,7 @@ This private payload subskill is not public. Enter it only through `autodesign-s
 
 - `pencil.wireframe-set` at `autodesign/outputs/pencil/wireframes`
 
-Stage 05 declares this output only. Do not create Pencil files or update design files.
+Stage 06 declares this output only. Do not create Pencil files or update design files.
 
 ## Hard Gates
 

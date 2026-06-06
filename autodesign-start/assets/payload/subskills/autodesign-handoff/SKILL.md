@@ -1,6 +1,6 @@
 ---
 name: autodesign-handoff
-description: Private Stage 05 contract for the Autodesign handoff subskill. Contract-only; checks prerequisites and does not generate handoff packages.
+description: Private Stage 06 contract for the Autodesign handoff subskill. Contract-only; checks prerequisites and does not generate handoff packages.
 ---
 
 # Autodesign Handoff Contract
@@ -23,7 +23,7 @@ This private payload subskill is not public. Enter it only through `autodesign-s
 
 - `handoff.package` at `autodesign/outputs/handoff`
 
-Stage 05 declares this output only. Do not create or update it.
+Stage 06 declares this output only. Do not create or update it.
 
 ## Hard Gates
 

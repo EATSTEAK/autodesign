@@ -1,6 +1,6 @@
 ---
 name: autodesign-ds
-description: Private Stage 05 contract for the Autodesign design-system subskill. Contract-only; checks prerequisites and does not generate DS artifacts.
+description: Private Stage 06 contract for the Autodesign design-system subskill. Contract-only; checks prerequisites and does not generate DS artifacts.
 ---
 
 # Autodesign Design System Contract
@@ -17,7 +17,7 @@ This private payload subskill is not public. Enter it only through `autodesign-s
 
 - `design-system.tokens` at `autodesign/outputs/design-system/tokens.json`
 
-Stage 05 declares this output only. Do not create or update it.
+Stage 06 declares this output only. Do not create or update it.
 
 ## Hard Gates
 

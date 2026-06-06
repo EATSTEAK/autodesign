@@ -6,7 +6,9 @@ Installable Codex skill package for `eatsteak/autodesign`.
 
 `autodesign-start/` is the only public skill exposed at install time. Runtime assets, private expanded subskill contracts, scripts, hooks, and workspace files are bundled under `autodesign-start/assets/payload/`.
 
-Stage 05 implements bootstrap workspace materialization, deterministic manifest and artifact graph state management, private subskill contract documentation, and subskill readiness checks. It does not implement canonical generation, image generation, Pencil operations, visual reference generation, design-system work, prototype generation, handoff, report generation, skill optimization, or real subskill phase behavior.
+Stage 06 implements bootstrap workspace materialization, deterministic manifest and artifact graph state management, private subskill readiness checks, and canonical pipeline generation from real project input files. It generates canonical planning artifacts only: project brief/interview intent, requirements/stories, brand direction, UX rules, screen model, interaction model, coverage matrix, decision log, navigation, screen-state matrix, and unapproved primary visual anchor proposals.
+
+Stage 06 does not implement image generation, Pencil operations, visual reference generation, design-system work, prototype generation, handoff, report generation, skill optimization, or downstream phase behavior.
 
 ## Bootstrap Runtime
 
@@ -43,7 +45,7 @@ The bootstrap script materializes `AGENTS.md`, `.codex/config.toml`, `.codex/hoo
 
 ## Manifest And Artifact Graph
 
-Stage 05 materializes:
+Stage 06 materializes:
 
 - `autodesign/manifest.json`
 - `autodesign/artifact-graph.json`
@@ -73,3 +75,19 @@ node autodesign-start/assets/payload/scripts/dirty-artifacts.mjs --workspace /ab
 ```
 
 Record an approval gate only with an explicit deterministic timestamp and `--approve-record`.
+
+## Canonical Generation
+
+Plan canonical generation from project inputs:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace /absolute/path/to/project --plan
+```
+
+Apply only with explicit approval and deterministic record metadata:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace /absolute/path/to/project --apply --approve-canonical-generation --actor <actor> --at <timestamp>
+```
+
+UX rules, interaction model, screen-state matrix, and visual anchor proposals require explicit platform selection in `autodesign/inputs`. Visual anchor proposals are generated with `approved: false`; selecting or approving an anchor belongs to a later stage.

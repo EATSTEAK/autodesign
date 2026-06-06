@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-export const STAGE = "05-subskill-contracts";
+export const STAGE = "06-canonical-pipeline";
 export const DEFAULT_MANIFEST_REL = "autodesign/manifest.json";
 export const DEFAULT_GRAPH_REL = "autodesign/artifact-graph.json";
 
@@ -47,7 +47,8 @@ const REFERENCE_ONLY_KINDS = new Set([
   "handoff"
 ]);
 const VALID_SUBSKILL_STATUSES = new Set([
-  "contract-only"
+  "contract-only",
+  "implemented"
 ]);
 const VALID_SUBSKILL_HARD_GATES = new Set([
   "state.valid",
@@ -55,6 +56,8 @@ const VALID_SUBSKILL_HARD_GATES = new Set([
   "upstream-artifacts.exist",
   "output-artifacts.declared",
   "disabled-behaviors.enforced",
+  "canonical-generation.enabled",
+  "platform-selection.present",
   "no-real-phase-behavior"
 ]);
 
@@ -106,7 +109,8 @@ export function validateState(state) {
       approvalGates: 0,
       approvalRecords: 0,
       artifacts: 0,
-      dependencies: 0
+      dependencies: 0,
+      generationRecords: 0
     },
     errors: [],
     warnings: []
@@ -202,6 +206,9 @@ export async function checkSubskillCanRun(state, subskillName) {
       upstreamArtifactsExist: false,
       outputArtifactsDeclared: false,
       disabledBehaviorsEnforced: false,
+      canonicalGenerationEnabled: state.manifest.disabledBehaviors
+        && state.manifest.disabledBehaviors.canonicalGeneration === false,
+      platformSelectionPresent: false,
       noRealPhaseBehavior: false
     },
     hardGates: [],
@@ -249,6 +256,9 @@ export async function checkSubskillCanRun(state, subskillName) {
     });
     return result;
   }
+
+  result.phaseBehaviorAllowed = contract.contractOnly === false && contract.implemented === true;
+  result.checks.platformSelectionPresent = await detectPlatformSelectionPresent(state);
 
   const artifactIndex = buildArtifactIndex(state.graph);
   const upstreamArtifacts = Array.isArray(contract.requiredUpstreamArtifacts) ? contract.requiredUpstreamArtifacts : [];
@@ -340,11 +350,19 @@ export async function checkSubskillCanRun(state, subskillName) {
   result.checks.disabledBehaviorsEnforced = disabledOk;
   result.checks.noRealPhaseBehavior = noRealPhaseBehavior;
 
-  if (!noRealPhaseBehavior) {
+  if (contract.contractOnly === true && !noRealPhaseBehavior) {
     result.errors.push({
       check: "no-real-phase-behavior",
       path: "manifest.subskillContracts",
-      message: "Stage 05 subskill contracts must remain contract-only with real behavior disabled"
+      message: "Contract-only subskills must keep real downstream phase behavior disabled"
+    });
+  }
+
+  if (contract.contractOnly === false && contract.implemented !== true) {
+    result.errors.push({
+      check: "implemented-subskill",
+      path: "manifest.subskillContracts",
+      message: "Implemented subskills must set implemented=true"
     });
   }
 
@@ -354,6 +372,8 @@ export async function checkSubskillCanRun(state, subskillName) {
     "upstream-artifacts.exist": result.checks.upstreamArtifactsExist,
     "output-artifacts.declared": result.checks.outputArtifactsDeclared,
     "disabled-behaviors.enforced": result.checks.disabledBehaviorsEnforced,
+    "canonical-generation.enabled": result.checks.canonicalGenerationEnabled,
+    "platform-selection.present": result.checks.platformSelectionPresent,
     "no-real-phase-behavior": result.checks.noRealPhaseBehavior
   };
 
@@ -371,10 +391,19 @@ export async function checkSubskillCanRun(state, subskillName) {
       continue;
     }
 
+    const passed = hardGateStatus[hardGate] === true;
     result.hardGates.push({
       id: hardGate,
-      passed: hardGateStatus[hardGate] === true
+      passed
     });
+
+    if (!passed) {
+      result.errors.push({
+        check: hardGate,
+        path: contract.path,
+        message: "hard gate did not pass"
+      });
+    }
   }
 
   result.canRun = result.errors.length === 0;
@@ -383,7 +412,7 @@ export async function checkSubskillCanRun(state, subskillName) {
     result.warnings.push({
       check: "contract-only",
       path: contract.path,
-      message: "Contract boundary can be entered, but real subskill behavior must not run in Stage 05."
+      message: "Contract boundary can be entered, but real downstream phase behavior must not run in Stage 06."
     });
   }
 
@@ -546,6 +575,7 @@ export function formatValidationResult(result) {
     `dependencies: ${result.counts.dependencies}`,
     `approval gates: ${result.counts.approvalGates}`,
     `approval records: ${result.counts.approvalRecords}`,
+    `generation records: ${result.counts.generationRecords}`,
     `errors: ${result.errors.length}`,
     `warnings: ${result.warnings.length}`
   ];
@@ -600,6 +630,8 @@ export function formatSubskillRunCheck(result) {
     `can run contract: ${result.canRun ? "yes" : "no"}`,
     `contract only: ${result.contractOnly === true ? "yes" : "no"}`,
     `phase behavior allowed: ${result.phaseBehaviorAllowed ? "yes" : "no"}`,
+    `canonical generation enabled: ${result.checks.canonicalGenerationEnabled ? "yes" : "no"}`,
+    `platform selection present: ${result.checks.platformSelectionPresent ? "yes" : "no"}`,
     `errors: ${result.errors.length}`,
     `warnings: ${result.warnings.length}`
   ];
@@ -786,6 +818,7 @@ function validateManifest(manifest, graph, result) {
   }
 
   validateApprovalGates(manifest, result);
+  validateGenerationRecords(manifest, result);
   validateDisabledBehaviors(manifest, result);
   validateSubskillContracts(manifest, graph, result);
 
@@ -875,6 +908,39 @@ function validateApprovalGates(manifest, result) {
   });
 }
 
+function validateGenerationRecords(manifest, result) {
+  const records = manifest.generationRecords;
+  if (!Array.isArray(records)) {
+    addError(result, "manifest.generationRecords", "generationRecords must be an array");
+    return;
+  }
+
+  result.counts.generationRecords = records.length;
+  const recordIds = new Set();
+
+  records.forEach((record, index) => {
+    const basePath = `manifest.generationRecords[${index}]`;
+    if (!isObject(record)) {
+      addError(result, basePath, "generation record must be an object");
+      return;
+    }
+
+    requireString(result, record.id, `${basePath}.id`);
+    if (recordIds.has(record.id)) {
+      addError(result, `${basePath}.id`, "generation record id must be unique");
+    }
+    recordIds.add(record.id);
+
+    requireString(result, record.actor, `${basePath}.actor`);
+    requireString(result, record.at, `${basePath}.at`);
+    requireString(result, record.script, `${basePath}.script`);
+    requireString(result, record.inputHash, `${basePath}.inputHash`);
+    requireStringArray(result, record.artifacts, `${basePath}.artifacts`);
+    requireStringArray(result, record.gates, `${basePath}.gates`);
+    requireStringArray(result, record.notes, `${basePath}.notes`);
+  });
+}
+
 function validateDisabledBehaviors(manifest, result) {
   if (!isObject(manifest.disabledBehaviors)) {
     addError(result, "manifest.disabledBehaviors", "disabledBehaviors must be an object");
@@ -882,8 +948,18 @@ function validateDisabledBehaviors(manifest, result) {
   }
 
   for (const key of DISABLED_BEHAVIOR_KEYS) {
+    if (!Object.prototype.hasOwnProperty.call(manifest.disabledBehaviors, key)) {
+      addError(result, `manifest.disabledBehaviors.${key}`, "disabled behavior guard is missing");
+    }
+  }
+
+  if (manifest.disabledBehaviors.canonicalGeneration !== false) {
+    addError(result, "manifest.disabledBehaviors.canonicalGeneration", "Stage 06 must enable canonical generation");
+  }
+
+  for (const key of DISABLED_BEHAVIOR_KEYS.filter((candidate) => candidate !== "canonicalGeneration")) {
     if (manifest.disabledBehaviors[key] !== true) {
-      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 05 must keep this behavior disabled");
+      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 06 must keep this behavior disabled");
     }
   }
 }
@@ -914,18 +990,26 @@ function validateSubskillContracts(manifest, graph, result) {
     requireString(result, contract.path, `${basePath}.path`);
 
     if (!VALID_SUBSKILL_STATUSES.has(contract.status)) {
-      addError(result, `${basePath}.status`, "status must be contract-only");
+      addError(result, `${basePath}.status`, "status must be contract-only or implemented");
     }
 
     requireBoolean(result, contract.contractOnly, `${basePath}.contractOnly`);
     requireBoolean(result, contract.implemented, `${basePath}.implemented`);
 
-    if (contract.contractOnly !== true) {
-      addError(result, `${basePath}.contractOnly`, "Stage 05 subskills must be contract-only");
+    if (contract.status === "contract-only" && contract.contractOnly !== true) {
+      addError(result, `${basePath}.contractOnly`, "contract-only subskills must set contractOnly=true");
     }
 
-    if (contract.implemented !== false) {
-      addError(result, `${basePath}.implemented`, "Stage 05 subskills must not implement real behavior");
+    if (contract.status === "contract-only" && contract.implemented !== false) {
+      addError(result, `${basePath}.implemented`, "contract-only subskills must set implemented=false");
+    }
+
+    if (contract.status === "implemented" && contract.contractOnly !== false) {
+      addError(result, `${basePath}.contractOnly`, "implemented subskills must set contractOnly=false");
+    }
+
+    if (contract.status === "implemented" && contract.implemented !== true) {
+      addError(result, `${basePath}.implemented`, "implemented subskills must set implemented=true");
     }
 
     requireStringArray(result, contract.requiredUpstreamArtifacts, `${basePath}.requiredUpstreamArtifacts`);
@@ -1007,16 +1091,16 @@ function validateGraph(graph, result) {
     requireStringArray(result, artifact.upstreamDependencies, `${basePath}.upstreamDependencies`);
     validateReconcile(result, artifact.reconcile, `${basePath}.reconcile`);
 
-    if (artifact.generated !== false) {
-      addError(result, `${basePath}.generated`, "Stage 05 graph entries must not mark artifacts as generated");
-    }
-
     if (artifact.kind === "canonical" && artifact.sourceOfTruth !== true) {
       addError(result, `${basePath}.sourceOfTruth`, "canonical artifacts must be source of truth");
     }
 
     if (REFERENCE_ONLY_KINDS.has(artifact.kind) && artifact.referenceOnly !== true) {
-      addError(result, `${basePath}.referenceOnly`, "downstream visual/Pencil/DS/prototype/handoff artifacts must be reference-only in Stage 05");
+      addError(result, `${basePath}.referenceOnly`, "downstream visual/Pencil/DS/prototype/handoff artifacts must be reference-only in Stage 06");
+    }
+
+    if (REFERENCE_ONLY_KINDS.has(artifact.kind) && artifact.generated !== false) {
+      addError(result, `${basePath}.generated`, "downstream visual/Pencil/DS/prototype/handoff artifacts must not be generated in Stage 06");
     }
 
     result.counts.dependencies += Array.isArray(artifact.upstreamDependencies) ? artifact.upstreamDependencies.length : 0;
@@ -1245,6 +1329,105 @@ function collectDownstreamClosure(graph, artifactId) {
 
   walk(artifactId);
   return [...seen].sort(compareArtifactIds(graph, order));
+}
+
+async function detectPlatformSelectionPresent(state) {
+  try {
+    const inputArtifact = buildArtifactIndex(state.graph).get("inputs.project-material");
+    if (!inputArtifact) {
+      return false;
+    }
+
+    const inputPath = resolveAgainst(state.workspaceRoot, inputArtifact.path);
+    const files = await collectReadableInputFiles(inputPath);
+    for (const filePath of files) {
+      const text = await fs.readFile(filePath, "utf8");
+      if (containsPlatformSelection(text)) {
+        return true;
+      }
+    }
+  } catch (error) {
+    if (error && (error.code === "ENOENT" || error.code === "EISDIR")) {
+      return false;
+    }
+    throw error;
+  }
+
+  return false;
+}
+
+async function collectReadableInputFiles(inputPath) {
+  const allowedExtensions = new Set([
+    ".csv",
+    ".html",
+    ".json",
+    ".md",
+    ".markdown",
+    ".tsv",
+    ".txt"
+  ]);
+  const files = [];
+
+  async function walk(currentPath) {
+    const stat = await fs.stat(currentPath);
+    if (stat.isDirectory()) {
+      const entries = await fs.readdir(currentPath, { withFileTypes: true });
+      entries.sort((left, right) => left.name.localeCompare(right.name));
+      for (const entry of entries) {
+        if (entry.name.startsWith(".")) {
+          continue;
+        }
+        await walk(path.join(currentPath, entry.name));
+      }
+      return;
+    }
+
+    if (!stat.isFile()) {
+      return;
+    }
+
+    const extension = path.extname(currentPath).toLowerCase();
+    if (!allowedExtensions.has(extension)) {
+      return;
+    }
+
+    if (path.basename(currentPath).toLowerCase() === "readme.md") {
+      return;
+    }
+
+    files.push(currentPath);
+  }
+
+  await walk(inputPath);
+  return files.sort();
+}
+
+function containsPlatformSelection(text) {
+  if (typeof text !== "string" || text.length === 0) {
+    return false;
+  }
+
+  const normalized = text.toLowerCase();
+  const explicitLinePattern = /(?:^|\n)\s*["']?(?:target\s+platform|primary\s+platform|targetPlatform|primaryPlatform|platform|surface|target\s+surface|targetSurface|form\s+factor|formFactor|device\s+target|deviceTarget)["']?\s*[:=-]\s*["']?(web|responsive\s+web|desktop\s+web|mobile|native\s+mobile|ios|android|desktop|macos|windows|browser\s+extension|tablet|kiosk)\b/i;
+  if (explicitLinePattern.test(text)) {
+    return true;
+  }
+
+  const phrasePatterns = [
+    /\bresponsive\s+web\s+app\b/,
+    /\bdesktop\s+web\s+app\b/,
+    /\bweb\s+app\b/,
+    /\bmobile\s+app\b/,
+    /\bnative\s+mobile\b/,
+    /\bios\s+app\b/,
+    /\bandroid\s+app\b/,
+    /\bdesktop\s+app\b/,
+    /\bbrowser\s+extension\b/,
+    /\btablet\s+experience\b/,
+    /\bkiosk\s+experience\b/
+  ];
+
+  return phrasePatterns.some((pattern) => pattern.test(normalized));
 }
 
 function compareArtifactIds(graph, order = null) {

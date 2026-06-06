@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "05-subskill-contracts",
+  "stage": "06-canonical-pipeline",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
   "workspace": {
@@ -15,8 +15,13 @@
       "canonical.project-brief",
       "canonical.requirements",
       "canonical.brand-direction",
+      "canonical.ux-rules",
       "canonical.screen-model",
-      "canonical.interaction-model"
+      "canonical.interaction-model",
+      "canonical.coverage-matrix",
+      "canonical.navigation",
+      "canonical.screen-state-matrix",
+      "canonical.visual-anchor-proposals"
     ],
     "referencesOnly": [
       "visual.reference-set",
@@ -36,13 +41,7 @@
       "implemented": false,
       "requiredUpstreamArtifacts": [],
       "outputArtifacts": [],
-      "outputFiles": [
-        "AGENTS.md",
-        ".codex/config.toml",
-        "autodesign/manifest.json",
-        "autodesign/artifact-graph.json",
-        "autodesign/.system/install-state.json"
-      ],
+      "outputFiles": [],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
@@ -58,104 +57,226 @@
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
       ]
     },
     {
       "name": "interview",
       "path": "subskills/autodesign-interview/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "inputs.project-material"
       ],
       "outputArtifacts": [
-        "canonical.project-brief"
+        "canonical.project-brief",
+        "log.decision-log"
       ],
-      "outputFiles": [],
+      "outputFiles": [
+        "autodesign/outputs/canonical/project-brief.json",
+        "autodesign/logs/decision-log.json"
+      ],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "canonical-generation.enabled"
       ],
-      "disabledBehaviors": [
-        "canonicalGeneration",
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Run scripts/generate-canonical.mjs in plan mode before apply.",
+        "Write only canonical artifacts and manifest/graph state updates with explicit approval."
       ]
     },
     {
       "name": "stories",
       "path": "subskills/autodesign-stories/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "canonical.project-brief"
       ],
       "outputArtifacts": [
-        "canonical.requirements"
+        "canonical.requirements",
+        "canonical.coverage-matrix",
+        "log.decision-log"
       ],
-      "outputFiles": [],
+      "outputFiles": [
+        "autodesign/outputs/canonical/requirements.json",
+        "autodesign/outputs/canonical/coverage-matrix.json",
+        "autodesign/logs/decision-log.json"
+      ],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "canonical-generation.enabled"
       ],
-      "disabledBehaviors": [
-        "canonicalGeneration",
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Run scripts/generate-canonical.mjs in plan mode before apply.",
+        "Write only canonical artifacts and manifest/graph state updates with explicit approval."
       ]
     },
     {
       "name": "brand",
       "path": "subskills/autodesign-brand/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "canonical.project-brief",
         "canonical.requirements"
       ],
       "outputArtifacts": [
-        "canonical.brand-direction"
+        "canonical.brand-direction",
+        "log.decision-log"
       ],
-      "outputFiles": [],
+      "outputFiles": [
+        "autodesign/outputs/canonical/brand-direction.json",
+        "autodesign/logs/decision-log.json"
+      ],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "canonical-generation.enabled"
       ],
-      "disabledBehaviors": [
-        "canonicalGeneration",
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Run scripts/generate-canonical.mjs in plan mode before apply.",
+        "Write only canonical artifacts and manifest/graph state updates with explicit approval."
+      ]
+    },
+    {
+      "name": "views",
+      "path": "subskills/autodesign-views/SKILL.md",
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
+      "requiredUpstreamArtifacts": [
+        "canonical.requirements"
+      ],
+      "outputArtifacts": [
+        "canonical.screen-model",
+        "canonical.navigation",
+        "canonical.coverage-matrix",
+        "log.decision-log"
+      ],
+      "outputFiles": [
+        "autodesign/outputs/canonical/screen-model.json",
+        "autodesign/outputs/canonical/navigation.json",
+        "autodesign/outputs/canonical/coverage-matrix.json",
+        "autodesign/logs/decision-log.json"
+      ],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "canonical-generation.enabled"
+      ],
+      "disabledBehaviors": [],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Run scripts/generate-canonical.mjs in plan mode before apply.",
+        "Write only canonical artifacts and manifest/graph state updates with explicit approval."
+      ]
+    },
+    {
+      "name": "ux",
+      "path": "subskills/autodesign-ux/SKILL.md",
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
+      "requiredUpstreamArtifacts": [
+        "canonical.project-brief",
+        "canonical.requirements",
+        "canonical.screen-model"
+      ],
+      "outputArtifacts": [
+        "canonical.ux-rules",
+        "canonical.interaction-model",
+        "canonical.screen-state-matrix",
+        "canonical.coverage-matrix",
+        "log.decision-log"
+      ],
+      "outputFiles": [
+        "autodesign/outputs/canonical/ux-rules.json",
+        "autodesign/outputs/canonical/interaction-model.json",
+        "autodesign/outputs/canonical/screen-state-matrix.json",
+        "autodesign/outputs/canonical/coverage-matrix.json",
+        "autodesign/logs/decision-log.json"
+      ],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "canonical-generation.enabled",
+        "platform-selection.present"
+      ],
+      "disabledBehaviors": [],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Run scripts/generate-canonical.mjs in plan mode before apply.",
+        "Write only canonical artifacts and manifest/graph state updates with explicit approval.",
+        "Stop if UX platform selection is missing from project input files."
+      ]
+    },
+    {
+      "name": "visual-anchors",
+      "path": "subskills/autodesign-visual-anchors/SKILL.md",
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
+      "requiredUpstreamArtifacts": [
+        "canonical.brand-direction",
+        "canonical.screen-model",
+        "canonical.interaction-model"
+      ],
+      "outputArtifacts": [
+        "canonical.visual-anchor-proposals",
+        "log.decision-log"
+      ],
+      "outputFiles": [
+        "autodesign/outputs/canonical/visual-anchor-proposals.json",
+        "autodesign/logs/decision-log.json"
+      ],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "canonical-generation.enabled",
+        "platform-selection.present"
+      ],
+      "disabledBehaviors": [],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Run scripts/generate-canonical.mjs in plan mode before apply.",
+        "Write only canonical artifacts and manifest/graph state updates with explicit approval.",
+        "Stop if UX platform selection is missing from project input files."
       ]
     },
     {
@@ -167,7 +288,8 @@
       "requiredUpstreamArtifacts": [
         "canonical.brand-direction",
         "canonical.screen-model",
-        "canonical.interaction-model"
+        "canonical.interaction-model",
+        "canonical.visual-anchor-proposals"
       ],
       "outputArtifacts": [
         "visual.reference-set"
@@ -190,71 +312,7 @@
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
-      ]
-    },
-    {
-      "name": "views",
-      "path": "subskills/autodesign-views/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
-      "requiredUpstreamArtifacts": [
-        "canonical.requirements"
-      ],
-      "outputArtifacts": [
-        "canonical.screen-model"
-      ],
-      "outputFiles": [],
-      "hardGates": [
-        "state.valid",
-        "graph.dependencies.valid",
-        "upstream-artifacts.exist",
-        "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
-      ],
-      "disabledBehaviors": [
-        "canonicalGeneration",
-        "realSubskillPhaseBehavior"
-      ],
-      "failFast": [
-        "Stop if state validation fails.",
-        "Stop if graph dependencies are missing or cyclic.",
-        "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
-      ]
-    },
-    {
-      "name": "ux",
-      "path": "subskills/autodesign-ux/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
-      "requiredUpstreamArtifacts": [
-        "canonical.screen-model"
-      ],
-      "outputArtifacts": [
-        "canonical.interaction-model"
-      ],
-      "outputFiles": [],
-      "hardGates": [
-        "state.valid",
-        "graph.dependencies.valid",
-        "upstream-artifacts.exist",
-        "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
-      ],
-      "disabledBehaviors": [
-        "canonicalGeneration",
-        "realSubskillPhaseBehavior"
-      ],
-      "failFast": [
-        "Stop if state validation fails.",
-        "Stop if graph dependencies are missing or cyclic.",
-        "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
       ]
     },
     {
@@ -265,7 +323,8 @@
       "implemented": false,
       "requiredUpstreamArtifacts": [
         "canonical.screen-model",
-        "canonical.interaction-model"
+        "canonical.interaction-model",
+        "canonical.screen-state-matrix"
       ],
       "outputArtifacts": [
         "pencil.wireframe-set"
@@ -287,7 +346,7 @@
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
       ]
     },
     {
@@ -320,7 +379,7 @@
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
       ]
     },
     {
@@ -354,7 +413,7 @@
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
       ]
     },
     {
@@ -366,6 +425,7 @@
       "requiredUpstreamArtifacts": [
         "canonical.screen-model",
         "canonical.interaction-model",
+        "canonical.screen-state-matrix",
         "pencil.wireframe-set",
         "design-system.tokens"
       ],
@@ -389,7 +449,7 @@
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
       ]
     },
     {
@@ -402,8 +462,13 @@
         "canonical.project-brief",
         "canonical.requirements",
         "canonical.brand-direction",
+        "canonical.ux-rules",
         "canonical.screen-model",
+        "canonical.navigation",
         "canonical.interaction-model",
+        "canonical.screen-state-matrix",
+        "canonical.coverage-matrix",
+        "canonical.visual-anchor-proposals",
         "visual.reference-set",
         "pencil.wireframe-set",
         "design-system.tokens",
@@ -429,7 +494,7 @@
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
       ]
     },
     {
@@ -443,8 +508,14 @@
         "canonical.project-brief",
         "canonical.requirements",
         "canonical.brand-direction",
+        "canonical.ux-rules",
         "canonical.screen-model",
         "canonical.interaction-model",
+        "canonical.coverage-matrix",
+        "canonical.navigation",
+        "canonical.screen-state-matrix",
+        "canonical.visual-anchor-proposals",
+        "log.decision-log",
         "visual.reference-set",
         "pencil.wireframe-set",
         "design-system.tokens",
@@ -470,7 +541,7 @@
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
       ]
     },
     {
@@ -502,7 +573,7 @@
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
       ]
     },
     {
@@ -533,7 +604,7 @@
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate outputs."
+        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
       ]
     }
   ],
@@ -589,18 +660,63 @@
     },
     {
       "id": "canonical.generation",
-      "status": "not-implemented",
+      "status": "pending",
       "required": true,
-      "implemented": false,
+      "implemented": true,
       "scope": [
-        "canonical"
+        "canonical.project-brief",
+        "canonical.requirements",
+        "canonical.brand-direction",
+        "canonical.ux-rules",
+        "canonical.screen-model",
+        "canonical.interaction-model",
+        "canonical.coverage-matrix",
+        "canonical.navigation",
+        "canonical.screen-state-matrix",
+        "canonical.visual-anchor-proposals"
       ],
       "requires": [
-        "later-stage"
+        "--approve-canonical-generation",
+        "--actor",
+        "--at"
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Canonical generation is outside Stage 05.",
+      "note": "Canonical generation is implemented for Stage 06 deterministic artifacts.",
+      "history": []
+    },
+    {
+      "id": "canonical.ux-platform-selection",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "canonical.ux-rules",
+        "canonical.interaction-model",
+        "canonical.screen-state-matrix"
+      ],
+      "requires": [
+        "explicit-platform-in-inputs"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "UX rules and interaction generation are blocked until platform selection is present in project inputs.",
+      "history": []
+    },
+    {
+      "id": "canonical.visual-anchor-selection",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "canonical.visual-anchor-proposals"
+      ],
+      "requires": [
+        "manual-selection"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Primary visual anchor proposals are generated but never auto-approved.",
       "history": []
     },
     {
@@ -616,7 +732,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Image generation is outside Stage 05.",
+      "note": "Image generation is outside Stage 06.",
       "history": []
     },
     {
@@ -632,7 +748,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Pencil operations are outside Stage 05.",
+      "note": "Pencil operations are outside Stage 06.",
       "history": []
     },
     {
@@ -648,7 +764,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Design-system generation is outside Stage 05.",
+      "note": "Design-system generation is outside Stage 06.",
       "history": []
     },
     {
@@ -664,7 +780,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Prototype generation is outside Stage 05.",
+      "note": "Prototype generation is outside Stage 06.",
       "history": []
     },
     {
@@ -680,13 +796,13 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Handoff export is outside Stage 05.",
+      "note": "Handoff export is outside Stage 06.",
       "history": []
     }
   ],
   "approvalRecords": [],
   "disabledBehaviors": {
-    "canonicalGeneration": true,
+    "canonicalGeneration": false,
     "imageGeneration": true,
     "pencilOperations": true,
     "visualReferenceGeneration": true,
@@ -696,8 +812,10 @@
     "realSubskillPhaseBehavior": true
   },
   "notes": [
-    "Stage 05 records private subskill contracts and deterministic invocation readiness only.",
-    "All direct subskills are contract-only and must stop before phase behavior.",
-    "No canonical artifacts, visual references, Pencil outputs, design-system outputs, prototypes, handoff packages, reconcile reports, eval reports, or skill optimization reports are generated in Stage 05."
-  ]
+    "Stage 06 enables deterministic canonical generation from real project input files.",
+    "UX platform selection is a hard gate for UX rules, interaction model, screen-state matrix, and visual anchor proposals.",
+    "Primary visual anchor proposals are planning-only and are not auto-approved.",
+    "No image generation, Pencil operations, visual reference generation, design-system outputs, prototypes, or handoff packages are generated in Stage 06."
+  ],
+  "generationRecords": []
 }

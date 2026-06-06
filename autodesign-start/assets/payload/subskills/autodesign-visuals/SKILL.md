@@ -1,6 +1,6 @@
 ---
 name: autodesign-visuals
-description: Private Stage 05 contract for the Autodesign visuals subskill. Contract-only; checks prerequisites and does not generate artifacts or images.
+description: Private Stage 06 contract for the Autodesign visual reference subskill. Contract-only; does not generate visual references or images.
 ---
 
 # Autodesign Visuals Contract
@@ -12,12 +12,13 @@ This private payload subskill is not public. Enter it only through `autodesign-s
 - `canonical.brand-direction` at `autodesign/outputs/canonical/brand-direction.json`
 - `canonical.screen-model` at `autodesign/outputs/canonical/screen-model.json`
 - `canonical.interaction-model` at `autodesign/outputs/canonical/interaction-model.json`
+- `canonical.visual-anchor-proposals` at `autodesign/outputs/canonical/visual-anchor-proposals.json`
 
 ## Output Artifacts
 
 - `visual.reference-set` at `autodesign/outputs/visual-references`
 
-Stage 05 declares this output only. Do not create references, call image generation, or update files.
+Stage 06 declares this downstream output only. Do not create references, call image generation, or update visual-reference files.
 
 ## Hard Gates
 

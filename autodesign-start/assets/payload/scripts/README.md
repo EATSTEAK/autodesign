@@ -1,6 +1,6 @@
 # Payload Scripts
 
-Stage 05 includes deterministic bootstrap, state-management, and subskill contract readiness scripts.
+Stage 06 includes deterministic bootstrap, state-management, subskill readiness, and canonical generation scripts.
 
 ## Bootstrap
 
@@ -22,7 +22,7 @@ If the plan reports `overwrite`, apply only after separate overwrite approval:
 node autodesign-start/assets/payload/scripts/bootstrap.mjs --target /absolute/path/to/project --apply --approve-bootstrap --approve-overwrite
 ```
 
-The script only copies files from `workspace-template/`. It does not generate canonical artifacts, images, Pencil files, visual references, design-system outputs, prototypes, handoffs, reports, or real subskill phase behavior.
+The script only copies files from `workspace-template/`. It does not generate canonical artifacts, images, Pencil files, visual references, design-system outputs, prototypes, handoffs, reports, or downstream phase behavior.
 
 ## Manifest And Graph State
 
@@ -56,4 +56,20 @@ Record approval gates with explicit data and write approval:
 node autodesign-start/assets/payload/scripts/record-gate.mjs --workspace /absolute/path/to/project --gate state.record-gate --status approved --actor <actor> --at <timestamp> --approve-record
 ```
 
-These scripts validate and record state only. They do not create canonical, visual, Pencil, design-system, prototype, handoff, report, optimization, or phase artifacts.
+## Canonical Generation
+
+Plan canonical generation without writing:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace /absolute/path/to/project --plan
+```
+
+Apply canonical generation only with explicit approval and deterministic record metadata:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace /absolute/path/to/project --apply --approve-canonical-generation --actor <actor> --at <timestamp>
+```
+
+Use `--subskill interview`, `stories`, `brand`, `views`, `ux`, or `visual-anchors` to generate a bounded canonical subset. UX and visual-anchor generation require explicit platform selection in project inputs.
+
+Stage 06 generation creates canonical artifacts and updates manifest/graph state only. It does not create images, Pencil files, visual references, design-system outputs, prototypes, handoffs, reports, optimization artifacts, or downstream phase artifacts.

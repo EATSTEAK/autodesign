@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "05-subskill-contracts",
+  "stage": "06-canonical-pipeline",
   "publicSkills": [
     "autodesign-start"
   ],
@@ -61,6 +61,19 @@
       "requiresApproval": [
         "--approve-record"
       ]
+    },
+    {
+      "name": "generate-canonical-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace <workspace> --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "generate-canonical-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-canonical.mjs --workspace <workspace> --apply --approve-canonical-generation --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-canonical-generation"
+      ]
     }
   ],
   "payload": {
@@ -84,18 +97,18 @@
       },
       {
         "path": "subskills/autodesign-interview/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private interview subskill contract for canonical.project-brief."
+        "status": "implemented",
+        "purpose": "Private interview subskill contract for deterministic Stage 06 canonical generation."
       },
       {
         "path": "subskills/autodesign-stories/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private stories subskill contract for canonical.requirements."
+        "status": "implemented",
+        "purpose": "Private stories subskill contract for deterministic Stage 06 canonical generation."
       },
       {
         "path": "subskills/autodesign-brand/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private brand subskill contract for canonical.brand-direction."
+        "status": "implemented",
+        "purpose": "Private brand subskill contract for deterministic Stage 06 canonical generation."
       },
       {
         "path": "subskills/autodesign-visuals/SKILL.md",
@@ -104,13 +117,18 @@
       },
       {
         "path": "subskills/autodesign-views/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private views subskill contract for canonical.screen-model."
+        "status": "implemented",
+        "purpose": "Private views subskill contract for deterministic Stage 06 canonical generation."
       },
       {
         "path": "subskills/autodesign-ux/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private UX subskill contract for canonical.interaction-model."
+        "status": "implemented",
+        "purpose": "Private ux subskill contract for deterministic Stage 06 canonical generation."
+      },
+      {
+        "path": "subskills/autodesign-visual-anchors/SKILL.md",
+        "status": "implemented",
+        "purpose": "Private visual anchor proposal subskill contract for canonical.visual-anchor-proposals."
       },
       {
         "path": "subskills/autodesign-wireframe/SKILL.md",
@@ -155,10 +173,15 @@
       {
         "path": "subskills/autodesign-phase-placeholder/SKILL.md",
         "status": "legacy-placeholder",
-        "purpose": "Stage 04 placeholder retained for compatibility; concrete Stage 05 contracts are listed above."
+        "purpose": "Stage 04 placeholder retained for compatibility; concrete Stage 06 contracts are listed above."
       }
     ],
     "scripts": [
+      {
+        "path": "scripts/generate-canonical.mjs",
+        "status": "implemented",
+        "purpose": "Deterministic Stage 06 canonical artifact generator and manifest/graph state updater."
+      },
       {
         "path": "scripts/bootstrap.mjs",
         "status": "implemented",
@@ -172,7 +195,7 @@
       {
         "path": "scripts/validate-state.mjs",
         "status": "implemented",
-        "purpose": "Validate manifest and artifact graph JSON plus Stage 05 semantic constraints."
+        "purpose": "Validate manifest and artifact graph JSON plus Stage 06 semantic constraints."
       },
       {
         "path": "scripts/check-dependencies.mjs",
@@ -226,10 +249,15 @@
     ],
     "recordGateRequires": [
       "--approve-record"
+    ],
+    "canonicalGenerationRequires": [
+      "--approve-canonical-generation",
+      "--actor",
+      "--at"
     ]
   },
   "disabledBehaviors": {
-    "canonicalGeneration": true,
+    "canonicalGeneration": false,
     "imageGeneration": true,
     "pencilOperations": true,
     "visualReferenceGeneration": true,
@@ -240,7 +268,8 @@
   },
   "notes": [
     "autodesign-start is the only public skill at install time.",
-    "Stage 05 implements private subskill contracts and deterministic readiness checks only.",
-    "No canonical generation, image generation, Pencil operation, design-system work, prototype generation, handoff, reconcile report generation, eval report generation, skill optimization, or real phase behavior is implemented."
+    "Stage 06 implements deterministic canonical generation from real project input files.",
+    "Primary visual anchor proposals are planning-only and are not auto-approved.",
+    "No image generation, Pencil operation, visual reference generation, design-system work, prototype generation, handoff, reconcile report generation, eval report generation, skill optimization, or downstream phase behavior is implemented."
   ]
 }

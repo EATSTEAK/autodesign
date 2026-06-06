@@ -1,6 +1,6 @@
 ---
 name: autodesign-skillopt
-description: Private Stage 05 contract for the Autodesign skill optimization subskill. Contract-only; checks prerequisites and does not change skills.
+description: Private Stage 06 contract for the Autodesign skill optimization subskill. Contract-only; checks prerequisites and does not change skills.
 ---
 
 # Autodesign Skillopt Contract
@@ -15,7 +15,7 @@ This private payload subskill is not public. Enter it only through `autodesign-s
 
 - `log.skillopt-report` at `autodesign/logs/skillopt-report.json`
 
-Stage 05 declares this output only. Do not create reports, modify skills, or optimize runtime behavior.
+Stage 06 declares this output only. Do not create reports, modify skills, or optimize runtime behavior.
 
 ## Hard Gates
 

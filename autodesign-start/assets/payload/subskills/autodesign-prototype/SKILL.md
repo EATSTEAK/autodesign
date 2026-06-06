@@ -1,6 +1,6 @@
 ---
 name: autodesign-prototype
-description: Private Stage 05 contract for the Autodesign prototype subskill. Contract-only; checks prerequisites and does not generate prototypes.
+description: Private Stage 06 contract for the Autodesign prototype subskill. Contract-only; checks prerequisites and does not generate prototypes.
 ---
 
 # Autodesign Prototype Contract
@@ -18,7 +18,7 @@ This private payload subskill is not public. Enter it only through `autodesign-s
 
 - `prototype.package` at `autodesign/outputs/prototype`
 
-Stage 05 declares this output only. Do not create or update it.
+Stage 06 declares this output only. Do not create or update it.
 
 ## Hard Gates
 

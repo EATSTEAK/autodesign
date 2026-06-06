@@ -1,6 +1,6 @@
 ---
 name: autodesign-bootstrap-runtime
-description: Private Stage 05 contract for the Autodesign bootstrap and state runtime boundary. Do not expose as a public skill and do not run generation behavior.
+description: Private Stage 06 contract for the Autodesign bootstrap and state runtime boundary. Do not expose as a public skill and do not run generation behavior.
 ---
 
 # Autodesign Bootstrap Runtime Contract
