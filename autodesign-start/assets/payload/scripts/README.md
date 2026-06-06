@@ -1,6 +1,6 @@
 # Payload Scripts
 
-Stage 03 includes only a deterministic bootstrap materialization script.
+Stage 04 includes deterministic bootstrap and state-management scripts.
 
 ## Bootstrap
 
@@ -23,3 +23,31 @@ node autodesign-start/assets/payload/scripts/bootstrap.mjs --target /absolute/pa
 ```
 
 The script only copies files from `workspace-template/`. It does not generate canonical artifacts, images, Pencil files, visual references, design-system outputs, handoffs, or real subskill phase behavior.
+
+## Manifest And Graph State
+
+Validate `autodesign/manifest.json` and `autodesign/artifact-graph.json`:
+
+```bash
+node autodesign-start/assets/payload/scripts/validate-state.mjs --workspace /absolute/path/to/project
+```
+
+Check upstream dependency references and cycles:
+
+```bash
+node autodesign-start/assets/payload/scripts/check-dependencies.mjs --workspace /absolute/path/to/project
+```
+
+Compute dirty downstream artifacts from changed upstream artifact ids:
+
+```bash
+node autodesign-start/assets/payload/scripts/dirty-artifacts.mjs --workspace /absolute/path/to/project --changed canonical.requirements
+```
+
+Record approval gates with explicit data and write approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/record-gate.mjs --workspace /absolute/path/to/project --gate state.record-gate --status approved --actor <actor> --at <timestamp> --approve-record
+```
+
+These scripts validate and record state only. They do not create canonical, visual, Pencil, design-system, handoff, or phase artifacts.

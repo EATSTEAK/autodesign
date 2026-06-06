@@ -6,7 +6,7 @@ Installable Codex skill package for `eatsteak/autodesign`.
 
 `autodesign-start/` is the only public skill exposed at install time. Runtime assets, private expanded subskill placeholders, scripts, hooks, and workspace files are bundled under `autodesign-start/assets/payload/`.
 
-Stage 03 implements only the bootstrap runtime. It does not implement canonical generation, image generation, Pencil operations, visual reference generation, design-system work, handoff, or real subskill phase behavior.
+Stage 04 implements bootstrap workspace materialization plus deterministic manifest and artifact graph state management. It does not implement canonical generation, image generation, Pencil operations, visual reference generation, design-system work, handoff, or real subskill phase behavior.
 
 ## Bootstrap Runtime
 
@@ -32,6 +32,7 @@ autodesign-start/
   assets/
     payload/
       payload-manifest.json
+      schemas/
       subskills/
       scripts/
       hooks/
@@ -39,3 +40,30 @@ autodesign-start/
 ```
 
 The bootstrap script materializes `AGENTS.md`, `.codex/config.toml`, `.codex/hooks/*.mjs`, and the `autodesign/` workspace files from the bundled template.
+
+## Manifest And Artifact Graph
+
+Stage 04 materializes:
+
+- `autodesign/manifest.json`
+- `autodesign/artifact-graph.json`
+
+Validate the state files:
+
+```bash
+node autodesign-start/assets/payload/scripts/validate-state.mjs --workspace /absolute/path/to/project
+```
+
+Check graph dependencies:
+
+```bash
+node autodesign-start/assets/payload/scripts/check-dependencies.mjs --workspace /absolute/path/to/project
+```
+
+Compute dirty downstream artifacts from upstream changes:
+
+```bash
+node autodesign-start/assets/payload/scripts/dirty-artifacts.mjs --workspace /absolute/path/to/project --changed canonical.requirements
+```
+
+Record an approval gate only with an explicit deterministic timestamp and `--approve-record`.

@@ -1,14 +1,17 @@
 # Autodesign Workspace
 
-This project has been materialized by the Autodesign Stage 03 bootstrap runtime.
+This project has been materialized by the Autodesign Stage 04 bootstrap and state runtime.
 
-Allowed Stage 03 behavior:
+Allowed Stage 04 behavior:
 
 - Inspect `autodesign/.system/install-state.json`.
+- Inspect and validate `autodesign/manifest.json`.
+- Inspect and validate `autodesign/artifact-graph.json`.
+- Run deterministic Stage 04 state scripts from the installed payload.
 - Inspect `.codex/config.toml` and `.codex/hooks/*.mjs`.
 - Use the bootstrap script to re-plan or re-apply template files with explicit approval gates.
 
-Not implemented in Stage 03:
+Not implemented in Stage 04:
 
 - Canonical generation.
 - Image generation.

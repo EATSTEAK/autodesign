@@ -1,10 +1,12 @@
-# Autodesign Stage 03 project-local marker.
+# Autodesign Stage 04 project-local marker.
 # The hook files listed here are no-op placeholders.
 
 [autodesign]
-stage = "03-bootstrap-runtime"
-runtime = "bootstrap-only"
+stage = "04-manifest-and-artifact-graph"
+runtime = "bootstrap-and-state-only"
 install_state = "autodesign/.system/install-state.json"
+manifest = "autodesign/manifest.json"
+artifact_graph = "autodesign/artifact-graph.json"
 
 [autodesign.hooks]
 bootstrap_noop = ".codex/hooks/autodesign-bootstrap-noop.mjs"

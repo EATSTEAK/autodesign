@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "03-bootstrap-runtime",
+  "stage": "04-manifest-and-artifact-graph",
   "publicSkills": [
     "autodesign-start"
   ],
@@ -28,9 +28,49 @@
         "--approve-bootstrap",
         "--approve-overwrite"
       ]
+    },
+    {
+      "name": "validate-state",
+      "command": "node autodesign-start/assets/payload/scripts/validate-state.mjs --workspace <workspace>",
+      "writesFiles": false
+    },
+    {
+      "name": "check-dependencies",
+      "command": "node autodesign-start/assets/payload/scripts/check-dependencies.mjs --workspace <workspace>",
+      "writesFiles": false
+    },
+    {
+      "name": "dirty-artifacts",
+      "command": "node autodesign-start/assets/payload/scripts/dirty-artifacts.mjs --workspace <workspace> --changed <artifact-id>",
+      "writesFiles": false
+    },
+    {
+      "name": "record-gate-plan",
+      "command": "node autodesign-start/assets/payload/scripts/record-gate.mjs --workspace <workspace> --gate <gate-id> --status <status> --actor <actor> --at <timestamp>",
+      "writesFiles": false
+    },
+    {
+      "name": "record-gate-apply",
+      "command": "node autodesign-start/assets/payload/scripts/record-gate.mjs --workspace <workspace> --gate <gate-id> --status <status> --actor <actor> --at <timestamp> --approve-record",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-record"
+      ]
     }
   ],
   "payload": {
+    "schemas": [
+      {
+        "path": "schemas/manifest.schema.json",
+        "status": "implemented",
+        "purpose": "Structural JSON schema for autodesign/manifest.json."
+      },
+      {
+        "path": "schemas/artifact-graph.schema.json",
+        "status": "implemented",
+        "purpose": "Structural JSON schema for autodesign/artifact-graph.json."
+      }
+    ],
     "subskills": [
       {
         "path": "subskills/autodesign-bootstrap-runtime/SKILL.md",
@@ -48,6 +88,31 @@
         "path": "scripts/bootstrap.mjs",
         "status": "implemented",
         "purpose": "Deterministic plan/apply materialization of workspace-template."
+      },
+      {
+        "path": "scripts/lib/autodesign-state.mjs",
+        "status": "implemented",
+        "purpose": "Shared deterministic validation, graph traversal, dirty computation, and gate-record helpers."
+      },
+      {
+        "path": "scripts/validate-state.mjs",
+        "status": "implemented",
+        "purpose": "Validate manifest and artifact graph JSON plus Stage 04 semantic constraints."
+      },
+      {
+        "path": "scripts/check-dependencies.mjs",
+        "status": "implemented",
+        "purpose": "Check upstream dependency references and graph cycles."
+      },
+      {
+        "path": "scripts/dirty-artifacts.mjs",
+        "status": "implemented",
+        "purpose": "Compute dirty downstream artifacts from changed upstream ids with reconcile metadata."
+      },
+      {
+        "path": "scripts/record-gate.mjs",
+        "status": "implemented",
+        "purpose": "Record approval gate status in manifest with explicit write approval."
       }
     ],
     "hooks": [
@@ -63,6 +128,8 @@
       "workspace-template/.codex/hooks/autodesign-bootstrap-noop.mjs",
       "workspace-template/.codex/hooks/autodesign-boundary-noop.mjs",
       "workspace-template/autodesign/README.md",
+      "workspace-template/autodesign/manifest.json",
+      "workspace-template/autodesign/artifact-graph.json",
       "workspace-template/autodesign/.system/install-state.json",
       "workspace-template/autodesign/inputs/README.md",
       "workspace-template/autodesign/outputs/README.md",
@@ -76,6 +143,9 @@
     ],
     "overwriteRequires": [
       "--approve-overwrite"
+    ],
+    "recordGateRequires": [
+      "--approve-record"
     ]
   },
   "disabledBehaviors": {
@@ -89,7 +159,7 @@
   },
   "notes": [
     "autodesign-start is the only public skill at install time.",
-    "Stage 03 only materializes bootstrap workspace files.",
-    "No canonical generation, image generation, Pencil operation, or real phase behavior is implemented."
+    "Stage 04 implements deterministic manifest and artifact graph state management only.",
+    "No canonical generation, image generation, Pencil operation, design-system work, handoff, or real phase behavior is implemented."
   ]
 }

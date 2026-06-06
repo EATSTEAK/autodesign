@@ -3,7 +3,7 @@ import { pathToFileURL } from "node:url";
 
 export const hookMetadata = {
   schemaVersion: 1,
-  stage: "03-bootstrap-runtime",
+  stage: "04-manifest-and-artifact-graph",
   hook: "autodesign-boundary-noop",
   behavior: "noop"
 };

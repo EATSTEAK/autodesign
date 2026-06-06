@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "stage": "04-manifest-and-artifact-graph",
+  "graphId": "autodesign-default-artifact-graph",
+  "artifacts": [
+    {
+      "id": "inputs.project-material",
+      "kind": "input",
+      "path": "autodesign/inputs",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [],
+      "reconcile": {
+        "policy": "preserve",
+        "preserve": [
+          "userFiles",
+          "sourceNotes"
+        ],
+        "mayChange": [],
+        "notes": "User-provided source material is preserved."
+      }
+    },
+    {
+      "id": "canonical.project-brief",
+      "kind": "canonical",
+      "path": "autodesign/outputs/canonical/project-brief.json",
+      "sourceOfTruth": true,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "inputs.project-material"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedDecisions",
+          "manualAnnotations"
+        ],
+        "mayChange": [
+          "summary",
+          "constraints",
+          "openQuestions"
+        ],
+        "notes": "Project-brief content may change when source inputs change, while explicit approvals are preserved."
+      }
+    },
+    {
+      "id": "canonical.requirements",
+      "kind": "canonical",
+      "path": "autodesign/outputs/canonical/requirements.json",
+      "sourceOfTruth": true,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "canonical.project-brief"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "acceptedRequirements",
+          "manualAnnotations"
+        ],
+        "mayChange": [
+          "functionalRequirements",
+          "nonFunctionalRequirements",
+          "priorityNotes"
+        ],
+        "notes": "Requirements may be recomputed from the approved project brief in later stages."
+      }
+    },
+    {
+      "id": "canonical.screen-model",
+      "kind": "canonical",
+      "path": "autodesign/outputs/canonical/screen-model.json",
+      "sourceOfTruth": true,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "canonical.requirements"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedScreens",
+          "manualAnnotations"
+        ],
+        "mayChange": [
+          "screens",
+          "navigation",
+          "contentInventory"
+        ],
+        "notes": "Screen model changes follow requirements changes."
+      }
+    },
+    {
+      "id": "canonical.interaction-model",
+      "kind": "canonical",
+      "path": "autodesign/outputs/canonical/interaction-model.json",
+      "sourceOfTruth": true,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "canonical.screen-model"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedFlows",
+          "manualAnnotations"
+        ],
+        "mayChange": [
+          "states",
+          "transitions",
+          "edgeCases"
+        ],
+        "notes": "Interaction semantics may change when the screen model changes."
+      }
+    },
+    {
+      "id": "visual.reference-set",
+      "kind": "visual-reference",
+      "path": "autodesign/outputs/visual-references",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "canonical.screen-model",
+        "canonical.interaction-model"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedDirection",
+          "manualReviewNotes"
+        ],
+        "mayChange": [
+          "referenceImages",
+          "compositionTargets",
+          "styleExplorations"
+        ],
+        "notes": "Visual references are downstream targets only; Stage 04 does not generate them."
+      }
+    },
+    {
+      "id": "pencil.workspace",
+      "kind": "pencil",
+      "path": "autodesign/outputs/pencil",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "canonical.screen-model",
+        "canonical.interaction-model",
+        "visual.reference-set"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "manualPencilEdits",
+          "approvedFrames",
+          "componentNames"
+        ],
+        "mayChange": [
+          "layoutGeometry",
+          "frameStructure",
+          "visualBindings"
+        ],
+        "notes": "Pencil workspace metadata is a downstream target only in Stage 04."
+      }
+    },
+    {
+      "id": "design-system.tokens",
+      "kind": "design-system",
+      "path": "autodesign/outputs/design-system/tokens.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "canonical.screen-model",
+        "visual.reference-set",
+        "pencil.workspace"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedTokens",
+          "manualOverrides"
+        ],
+        "mayChange": [
+          "colorTokens",
+          "typeTokens",
+          "spacingTokens",
+          "componentTokens"
+        ],
+        "notes": "Design-system token output is not generated in Stage 04."
+      }
+    },
+    {
+      "id": "handoff.package",
+      "kind": "handoff",
+      "path": "autodesign/outputs/handoff",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "canonical.project-brief",
+        "canonical.requirements",
+        "canonical.screen-model",
+        "canonical.interaction-model",
+        "visual.reference-set",
+        "pencil.workspace",
+        "design-system.tokens"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "handoffApprovals",
+          "manualReleaseNotes"
+        ],
+        "mayChange": [
+          "exportedArtifacts",
+          "deliveryChecklist"
+        ],
+        "notes": "Handoff package is a downstream target only in Stage 04."
+      }
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "stage": "04-manifest-and-artifact-graph",
+  "package": "eatsteak/autodesign",
+  "publicSkill": "autodesign-start",
+  "workspace": {
+    "root": "autodesign",
+    "manifestPath": "autodesign/manifest.json",
+    "artifactGraphPath": "autodesign/artifact-graph.json"
+  },
+  "artifactGraph": {
+    "path": "autodesign/artifact-graph.json",
+    "schema": "autodesign-start/assets/payload/schemas/artifact-graph.schema.json",
+    "sourceOfTruth": [
+      "canonical.project-brief",
+      "canonical.requirements",
+      "canonical.screen-model",
+      "canonical.interaction-model"
+    ],
+    "referencesOnly": [
+      "visual.reference-set",
+      "pencil.workspace",
+      "design-system.tokens",
+      "handoff.package"
+    ]
+  },
+  "approvalGates": [
+    {
+      "id": "bootstrap.apply",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "workspace-template"
+      ],
+      "requires": [
+        "--approve-bootstrap"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "",
+      "history": []
+    },
+    {
+      "id": "bootstrap.overwrite",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "workspace-template"
+      ],
+      "requires": [
+        "--approve-overwrite"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "",
+      "history": []
+    },
+    {
+      "id": "state.record-gate",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "manifest.approvalGates",
+        "manifest.approvalRecords"
+      ],
+      "requires": [
+        "--approve-record"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "",
+      "history": []
+    },
+    {
+      "id": "canonical.generation",
+      "status": "not-implemented",
+      "required": true,
+      "implemented": false,
+      "scope": [
+        "canonical"
+      ],
+      "requires": [
+        "later-stage"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Canonical generation is outside Stage 04.",
+      "history": []
+    },
+    {
+      "id": "image.generation",
+      "status": "not-implemented",
+      "required": true,
+      "implemented": false,
+      "scope": [
+        "visual-reference"
+      ],
+      "requires": [
+        "later-stage"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Image generation is outside Stage 04.",
+      "history": []
+    },
+    {
+      "id": "pencil.operations",
+      "status": "not-implemented",
+      "required": true,
+      "implemented": false,
+      "scope": [
+        "pencil"
+      ],
+      "requires": [
+        "later-stage"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Pencil operations are outside Stage 04.",
+      "history": []
+    },
+    {
+      "id": "design-system.generation",
+      "status": "not-implemented",
+      "required": true,
+      "implemented": false,
+      "scope": [
+        "design-system"
+      ],
+      "requires": [
+        "later-stage"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Design-system generation is outside Stage 04.",
+      "history": []
+    },
+    {
+      "id": "handoff.export",
+      "status": "not-implemented",
+      "required": true,
+      "implemented": false,
+      "scope": [
+        "handoff"
+      ],
+      "requires": [
+        "later-stage"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Handoff export is outside Stage 04.",
+      "history": []
+    }
+  ],
+  "approvalRecords": [],
+  "disabledBehaviors": {
+    "canonicalGeneration": true,
+    "imageGeneration": true,
+    "pencilOperations": true,
+    "visualReferenceGeneration": true,
+    "designSystemGeneration": true,
+    "handoff": true,
+    "realSubskillPhaseBehavior": true
+  },
+  "notes": [
+    "Stage 04 records state, dependency semantics, and approval gates only.",
+    "Canonical artifacts are source-of-truth targets for later stages.",
+    "Visual, Pencil, design-system, and handoff artifacts are reference-only targets in this stage."
+  ]
+}

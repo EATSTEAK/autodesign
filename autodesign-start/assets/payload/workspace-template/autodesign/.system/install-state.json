@@ -1,10 +1,16 @@
 {
   "schemaVersion": 1,
-  "stage": "03-bootstrap-runtime",
+  "stage": "04-manifest-and-artifact-graph",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
-  "runtime": "bootstrap-only",
+  "runtime": "bootstrap-and-state-only",
   "materializedBy": "autodesign-start/assets/payload/scripts/bootstrap.mjs",
+  "stateScripts": {
+    "validateState": "autodesign-start/assets/payload/scripts/validate-state.mjs",
+    "checkDependencies": "autodesign-start/assets/payload/scripts/check-dependencies.mjs",
+    "recordGate": "autodesign-start/assets/payload/scripts/record-gate.mjs",
+    "dirtyArtifacts": "autodesign-start/assets/payload/scripts/dirty-artifacts.mjs"
+  },
   "approvalGates": {
     "applyRequires": [
       "--approve-bootstrap"
@@ -19,6 +25,8 @@
     ".codex/hooks/autodesign-bootstrap-noop.mjs",
     ".codex/hooks/autodesign-boundary-noop.mjs",
     "autodesign/README.md",
+    "autodesign/manifest.json",
+    "autodesign/artifact-graph.json",
     "autodesign/.system/install-state.json",
     "autodesign/inputs/README.md",
     "autodesign/outputs/README.md",

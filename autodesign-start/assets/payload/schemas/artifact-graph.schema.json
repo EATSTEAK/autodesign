@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eatsteak.github.io/autodesign/schemas/artifact-graph.schema.json",
+  "title": "Autodesign Artifact Graph",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "stage",
+    "graphId",
+    "artifacts"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "stage": {
+      "type": "string",
+      "minLength": 1
+    },
+    "graphId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "path",
+        "sourceOfTruth",
+        "generated",
+        "referenceOnly",
+        "required",
+        "upstreamDependencies",
+        "reconcile"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]*$"
+        },
+        "kind": {
+          "enum": [
+            "input",
+            "canonical",
+            "visual-reference",
+            "pencil",
+            "design-system",
+            "handoff",
+            "log"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceOfTruth": {
+          "type": "boolean"
+        },
+        "generated": {
+          "type": "boolean"
+        },
+        "referenceOnly": {
+          "type": "boolean"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "upstreamDependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "reconcile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "policy",
+            "preserve",
+            "mayChange",
+            "notes"
+          ],
+          "properties": {
+            "policy": {
+              "enum": [
+                "preserve",
+                "may-change"
+              ]
+            },
+            "preserve": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "mayChange": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
