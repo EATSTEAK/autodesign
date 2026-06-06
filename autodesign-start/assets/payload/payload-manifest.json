@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "stage": "02-package-scaffold",
+  "publicSkills": [
+    "autodesign-start"
+  ],
+  "payloadRoot": "autodesign-start/assets/payload",
+  "runtimeImplemented": false,
+  "placeholders": [
+    {
+      "path": "subskills/",
+      "purpose": "Future expanded private Autodesign subskills.",
+      "status": "placeholder"
+    },
+    {
+      "path": "scripts/",
+      "purpose": "Future deterministic bootstrap and generation helper scripts.",
+      "status": "placeholder"
+    },
+    {
+      "path": "hooks/",
+      "purpose": "Future lifecycle hook definitions or adapters.",
+      "status": "placeholder"
+    },
+    {
+      "path": "workspace-template/",
+      "purpose": "Future Autodesign workspace template files.",
+      "status": "placeholder"
+    }
+  ],
+  "notes": [
+    "autodesign-start is the only public skill at install time.",
+    "No runtime generation behavior is implemented in Stage 02."
+  ]
+}

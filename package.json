@@ -1,0 +1,13 @@
+{
+  "name": "autodesign-skill-package",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Stage 02 scaffold for the eatsteak/autodesign installable Codex skill package.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eatsteak/autodesign.git"
+  },
+  "files": [
+    "autodesign-start"
+  ]
+}
