@@ -1,3 +1,3 @@
 # Autodesign Inputs
 
-Reserved for later stages. Stage 04 does not read or transform input material.
+Reserved for later stages. Stage 05 does not read, transform, or synthesize input material.

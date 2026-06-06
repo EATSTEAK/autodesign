@@ -4,9 +4,9 @@ Installable Codex skill package for `eatsteak/autodesign`.
 
 ## Public Skill Surface
 
-`autodesign-start/` is the only public skill exposed at install time. Runtime assets, private expanded subskill placeholders, scripts, hooks, and workspace files are bundled under `autodesign-start/assets/payload/`.
+`autodesign-start/` is the only public skill exposed at install time. Runtime assets, private expanded subskill contracts, scripts, hooks, and workspace files are bundled under `autodesign-start/assets/payload/`.
 
-Stage 04 implements bootstrap workspace materialization plus deterministic manifest and artifact graph state management. It does not implement canonical generation, image generation, Pencil operations, visual reference generation, design-system work, handoff, or real subskill phase behavior.
+Stage 05 implements bootstrap workspace materialization, deterministic manifest and artifact graph state management, private subskill contract documentation, and subskill readiness checks. It does not implement canonical generation, image generation, Pencil operations, visual reference generation, design-system work, prototype generation, handoff, report generation, skill optimization, or real subskill phase behavior.
 
 ## Bootstrap Runtime
 
@@ -43,7 +43,7 @@ The bootstrap script materializes `AGENTS.md`, `.codex/config.toml`, `.codex/hoo
 
 ## Manifest And Artifact Graph
 
-Stage 04 materializes:
+Stage 05 materializes:
 
 - `autodesign/manifest.json`
 - `autodesign/artifact-graph.json`
@@ -58,6 +58,12 @@ Check graph dependencies:
 
 ```bash
 node autodesign-start/assets/payload/scripts/check-dependencies.mjs --workspace /absolute/path/to/project
+```
+
+Check whether a named private subskill contract can be entered:
+
+```bash
+node autodesign-start/assets/payload/scripts/can-run-subskill.mjs --workspace /absolute/path/to/project --subskill interview
 ```
 
 Compute dirty downstream artifacts from upstream changes:

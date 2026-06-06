@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "04-manifest-and-artifact-graph",
+  "stage": "05-subskill-contracts",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
   "workspace": {
@@ -14,16 +14,529 @@
     "sourceOfTruth": [
       "canonical.project-brief",
       "canonical.requirements",
+      "canonical.brand-direction",
       "canonical.screen-model",
       "canonical.interaction-model"
     ],
     "referencesOnly": [
       "visual.reference-set",
-      "pencil.workspace",
+      "pencil.wireframe-set",
+      "design-system.primitives",
       "design-system.tokens",
+      "prototype.package",
       "handoff.package"
     ]
   },
+  "subskillContracts": [
+    {
+      "name": "bootstrap-runtime",
+      "path": "subskills/autodesign-bootstrap-runtime/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [],
+      "outputArtifacts": [],
+      "outputFiles": [
+        "AGENTS.md",
+        ".codex/config.toml",
+        "autodesign/manifest.json",
+        "autodesign/artifact-graph.json",
+        "autodesign/.system/install-state.json"
+      ],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "interview",
+      "path": "subskills/autodesign-interview/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "inputs.project-material"
+      ],
+      "outputArtifacts": [
+        "canonical.project-brief"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "canonicalGeneration",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "stories",
+      "path": "subskills/autodesign-stories/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "canonical.project-brief"
+      ],
+      "outputArtifacts": [
+        "canonical.requirements"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "canonicalGeneration",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "brand",
+      "path": "subskills/autodesign-brand/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "canonical.project-brief",
+        "canonical.requirements"
+      ],
+      "outputArtifacts": [
+        "canonical.brand-direction"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "canonicalGeneration",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "visuals",
+      "path": "subskills/autodesign-visuals/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "canonical.brand-direction",
+        "canonical.screen-model",
+        "canonical.interaction-model"
+      ],
+      "outputArtifacts": [
+        "visual.reference-set"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "imageGeneration",
+        "visualReferenceGeneration",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "views",
+      "path": "subskills/autodesign-views/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "canonical.requirements"
+      ],
+      "outputArtifacts": [
+        "canonical.screen-model"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "canonicalGeneration",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "ux",
+      "path": "subskills/autodesign-ux/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "canonical.screen-model"
+      ],
+      "outputArtifacts": [
+        "canonical.interaction-model"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "canonicalGeneration",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "wireframe",
+      "path": "subskills/autodesign-wireframe/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "canonical.screen-model",
+        "canonical.interaction-model"
+      ],
+      "outputArtifacts": [
+        "pencil.wireframe-set"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "pencilOperations",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "primitives",
+      "path": "subskills/autodesign-primitives/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "canonical.brand-direction",
+        "visual.reference-set"
+      ],
+      "outputArtifacts": [
+        "design-system.primitives"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "designSystemGeneration",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "ds",
+      "path": "subskills/autodesign-ds/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "design-system.primitives",
+        "visual.reference-set",
+        "pencil.wireframe-set"
+      ],
+      "outputArtifacts": [
+        "design-system.tokens"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "designSystemGeneration",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "prototype",
+      "path": "subskills/autodesign-prototype/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "canonical.screen-model",
+        "canonical.interaction-model",
+        "pencil.wireframe-set",
+        "design-system.tokens"
+      ],
+      "outputArtifacts": [
+        "prototype.package"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "prototypeGeneration",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "handoff",
+      "path": "subskills/autodesign-handoff/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "canonical.project-brief",
+        "canonical.requirements",
+        "canonical.brand-direction",
+        "canonical.screen-model",
+        "canonical.interaction-model",
+        "visual.reference-set",
+        "pencil.wireframe-set",
+        "design-system.tokens",
+        "prototype.package"
+      ],
+      "outputArtifacts": [
+        "handoff.package"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "handoff",
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "reconcile",
+      "path": "subskills/autodesign-reconcile/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "inputs.project-material",
+        "canonical.project-brief",
+        "canonical.requirements",
+        "canonical.brand-direction",
+        "canonical.screen-model",
+        "canonical.interaction-model",
+        "visual.reference-set",
+        "pencil.wireframe-set",
+        "design-system.tokens",
+        "prototype.package",
+        "handoff.package"
+      ],
+      "outputArtifacts": [
+        "log.reconcile-report"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "eval",
+      "path": "subskills/autodesign-eval/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "handoff.package",
+        "log.reconcile-report"
+      ],
+      "outputArtifacts": [
+        "log.eval-report"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    },
+    {
+      "name": "skillopt",
+      "path": "subskills/autodesign-skillopt/SKILL.md",
+      "status": "contract-only",
+      "contractOnly": true,
+      "implemented": false,
+      "requiredUpstreamArtifacts": [
+        "log.eval-report"
+      ],
+      "outputArtifacts": [
+        "log.skillopt-report"
+      ],
+      "outputFiles": [],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "disabled-behaviors.enforced",
+        "no-real-phase-behavior"
+      ],
+      "disabledBehaviors": [
+        "realSubskillPhaseBehavior"
+      ],
+      "failFast": [
+        "Stop if state validation fails.",
+        "Stop if graph dependencies are missing or cyclic.",
+        "Stop if any required upstream artifact path is absent.",
+        "Stop after reporting contract-only status; do not generate or mutate outputs."
+      ]
+    }
+  ],
   "approvalGates": [
     {
       "id": "bootstrap.apply",
@@ -87,7 +600,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Canonical generation is outside Stage 04.",
+      "note": "Canonical generation is outside Stage 05.",
       "history": []
     },
     {
@@ -103,7 +616,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Image generation is outside Stage 04.",
+      "note": "Image generation is outside Stage 05.",
       "history": []
     },
     {
@@ -119,7 +632,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Pencil operations are outside Stage 04.",
+      "note": "Pencil operations are outside Stage 05.",
       "history": []
     },
     {
@@ -135,7 +648,23 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Design-system generation is outside Stage 04.",
+      "note": "Design-system generation is outside Stage 05.",
+      "history": []
+    },
+    {
+      "id": "prototype.generation",
+      "status": "not-implemented",
+      "required": true,
+      "implemented": false,
+      "scope": [
+        "prototype"
+      ],
+      "requires": [
+        "later-stage"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Prototype generation is outside Stage 05.",
       "history": []
     },
     {
@@ -151,7 +680,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Handoff export is outside Stage 04.",
+      "note": "Handoff export is outside Stage 05.",
       "history": []
     }
   ],
@@ -162,12 +691,13 @@
     "pencilOperations": true,
     "visualReferenceGeneration": true,
     "designSystemGeneration": true,
+    "prototypeGeneration": true,
     "handoff": true,
     "realSubskillPhaseBehavior": true
   },
   "notes": [
-    "Stage 04 records state, dependency semantics, and approval gates only.",
-    "Canonical artifacts are source-of-truth targets for later stages.",
-    "Visual, Pencil, design-system, and handoff artifacts are reference-only targets in this stage."
+    "Stage 05 records private subskill contracts and deterministic invocation readiness only.",
+    "All direct subskills are contract-only and must stop before phase behavior.",
+    "No canonical artifacts, visual references, Pencil outputs, design-system outputs, prototypes, handoff packages, reconcile reports, eval reports, or skill optimization reports are generated in Stage 05."
   ]
 }

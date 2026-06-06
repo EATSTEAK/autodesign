@@ -1,6 +1,6 @@
 ---
 name: autodesign-start
-description: Start Autodesign setup from the eatsteak/autodesign skill package. Use when the user asks to initialize, start, install-check, bootstrap, validate state, inspect the artifact graph, record gates, or compute dirty artifacts. In Stage 04, only run explicit bootstrap and state-management scripts and do not run generation behavior.
+description: Start Autodesign setup from the eatsteak/autodesign skill package. Use when the user asks to initialize, start, install-check, bootstrap, validate state, inspect the artifact graph, check subskill readiness, record gates, or compute dirty artifacts. In Stage 05, only run explicit bootstrap, state-management, and contract-readiness scripts and do not run generation behavior.
 ---
 
 # Autodesign Start
@@ -9,22 +9,22 @@ This is the only public skill exposed by the `eatsteak/autodesign` package at in
 
 ## Current Stage
 
-Stage 04 provides a one-shot bootstrap runtime that materializes the bundled Autodesign workspace template into a target project, plus deterministic manifest and artifact graph state-management scripts.
+Stage 05 provides a one-shot bootstrap runtime that materializes the bundled Autodesign workspace template into a target project, deterministic manifest and artifact graph state-management scripts, and private subskill contract readiness checks.
 
-Do not generate canonical artifacts, create Pencil files, call image generation, run design-system logic, generate visual references, hand off to another phase, or execute real expanded subskill behavior from this skill. Detailed generators and expanded subskill behavior belong to later stages.
+Do not generate canonical artifacts, create Pencil files, call image generation, run design-system logic, generate visual references, generate prototypes, hand off to another phase, generate reports, optimize skills, or execute real expanded subskill behavior from this skill. Detailed generators and expanded subskill behavior belong to later stages.
 
 ## Bundled Payload
 
 Runtime assets live under `assets/payload/`:
 
-- `subskills/` for private no-op Autodesign subskill placeholders.
+- `subskills/` for private contract-only Autodesign subskills.
 - `schemas/` for manifest and artifact graph JSON schema files.
 - `scripts/bootstrap.mjs` for deterministic plan/apply workspace materialization.
-- `scripts/validate-state.mjs`, `scripts/check-dependencies.mjs`, `scripts/record-gate.mjs`, and `scripts/dirty-artifacts.mjs` for Stage 04 state management.
+- `scripts/validate-state.mjs`, `scripts/check-dependencies.mjs`, `scripts/can-run-subskill.mjs`, `scripts/record-gate.mjs`, and `scripts/dirty-artifacts.mjs` for Stage 05 state and contract readiness management.
 - `hooks/` for no-op lifecycle hook adapters.
 - `workspace-template/` for files materialized by the bootstrap runtime.
 
-Read `assets/payload/payload-manifest.json` for the concrete Stage 04 payload inventory.
+Read `assets/payload/payload-manifest.json` for the concrete Stage 05 payload inventory.
 
 ## Bootstrap Command
 
@@ -68,6 +68,12 @@ Check required upstream dependencies and cycles:
 node autodesign-start/assets/payload/scripts/check-dependencies.mjs --workspace /absolute/path/to/project
 ```
 
+Check whether a named private subskill contract can be entered:
+
+```bash
+node autodesign-start/assets/payload/scripts/can-run-subskill.mjs --workspace /absolute/path/to/project --subskill interview
+```
+
 Compute dirty downstream artifacts from changed upstreams:
 
 ```bash
@@ -82,7 +88,7 @@ node autodesign-start/assets/payload/scripts/record-gate.mjs --workspace /absolu
 
 ## Materialized Files
 
-The bootstrap runtime copies `assets/payload/workspace-template/` into the target project. Stage 04 materializes:
+The bootstrap runtime copies `assets/payload/workspace-template/` into the target project. Stage 05 materializes:
 
 - `AGENTS.md`
 - `.codex/config.toml`
@@ -100,3 +106,4 @@ The bootstrap runtime copies `assets/payload/workspace-template/` into the targe
 3. Run the plan command against the requested target workspace.
 4. Report planned file actions and approval gates.
 5. Apply only with the explicit approval flags described above.
+6. For private subskill requests, run `can-run-subskill.mjs` and report readiness. Do not run real phase behavior.

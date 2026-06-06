@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "04-manifest-and-artifact-graph",
+  "stage": "05-subskill-contracts",
   "graphId": "autodesign-default-artifact-graph",
   "artifacts": [
     {
@@ -44,7 +44,7 @@
           "constraints",
           "openQuestions"
         ],
-        "notes": "Project-brief content may change when source inputs change, while explicit approvals are preserved."
+        "notes": "Project-brief content is a later-stage output target."
       }
     },
     {
@@ -69,7 +69,33 @@
           "nonFunctionalRequirements",
           "priorityNotes"
         ],
-        "notes": "Requirements may be recomputed from the approved project brief in later stages."
+        "notes": "Requirements and user stories are later-stage output targets."
+      }
+    },
+    {
+      "id": "canonical.brand-direction",
+      "kind": "canonical",
+      "path": "autodesign/outputs/canonical/brand-direction.json",
+      "sourceOfTruth": true,
+      "generated": false,
+      "referenceOnly": false,
+      "required": true,
+      "upstreamDependencies": [
+        "canonical.project-brief",
+        "canonical.requirements"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedBrandDirection",
+          "manualAnnotations"
+        ],
+        "mayChange": [
+          "brandAttributes",
+          "tone",
+          "visualPrinciples"
+        ],
+        "notes": "Brand direction is a later-stage source-of-truth target."
       }
     },
     {
@@ -131,6 +157,7 @@
       "referenceOnly": true,
       "required": false,
       "upstreamDependencies": [
+        "canonical.brand-direction",
         "canonical.screen-model",
         "canonical.interaction-model"
       ],
@@ -145,21 +172,20 @@
           "compositionTargets",
           "styleExplorations"
         ],
-        "notes": "Visual references are downstream targets only; Stage 04 does not generate them."
+        "notes": "Visual references are downstream targets only; Stage 05 does not generate them."
       }
     },
     {
-      "id": "pencil.workspace",
+      "id": "pencil.wireframe-set",
       "kind": "pencil",
-      "path": "autodesign/outputs/pencil",
+      "path": "autodesign/outputs/pencil/wireframes",
       "sourceOfTruth": false,
       "generated": false,
       "referenceOnly": true,
       "required": false,
       "upstreamDependencies": [
         "canonical.screen-model",
-        "canonical.interaction-model",
-        "visual.reference-set"
+        "canonical.interaction-model"
       ],
       "reconcile": {
         "policy": "may-change",
@@ -173,7 +199,33 @@
           "frameStructure",
           "visualBindings"
         ],
-        "notes": "Pencil workspace metadata is a downstream target only in Stage 04."
+        "notes": "Wireframe output is a downstream target only in Stage 05."
+      }
+    },
+    {
+      "id": "design-system.primitives",
+      "kind": "design-system",
+      "path": "autodesign/outputs/design-system/primitives.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "canonical.brand-direction",
+        "visual.reference-set"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedPrimitives",
+          "manualOverrides"
+        ],
+        "mayChange": [
+          "colorPrimitives",
+          "typePrimitives",
+          "spacingPrimitives"
+        ],
+        "notes": "Primitive design tokens are downstream targets only in Stage 05."
       }
     },
     {
@@ -185,9 +237,9 @@
       "referenceOnly": true,
       "required": false,
       "upstreamDependencies": [
-        "canonical.screen-model",
+        "design-system.primitives",
         "visual.reference-set",
-        "pencil.workspace"
+        "pencil.wireframe-set"
       ],
       "reconcile": {
         "policy": "may-change",
@@ -196,12 +248,39 @@
           "manualOverrides"
         ],
         "mayChange": [
-          "colorTokens",
-          "typeTokens",
-          "spacingTokens",
-          "componentTokens"
+          "componentTokens",
+          "semanticTokens",
+          "implementationNotes"
         ],
-        "notes": "Design-system token output is not generated in Stage 04."
+        "notes": "Design-system token output is not generated in Stage 05."
+      }
+    },
+    {
+      "id": "prototype.package",
+      "kind": "prototype",
+      "path": "autodesign/outputs/prototype",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "canonical.screen-model",
+        "canonical.interaction-model",
+        "pencil.wireframe-set",
+        "design-system.tokens"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedPrototypeScope",
+          "manualImplementationNotes"
+        ],
+        "mayChange": [
+          "prototypeFiles",
+          "interactionBindings",
+          "previewMetadata"
+        ],
+        "notes": "Prototype package is a downstream target only in Stage 05."
       }
     },
     {
@@ -215,11 +294,13 @@
       "upstreamDependencies": [
         "canonical.project-brief",
         "canonical.requirements",
+        "canonical.brand-direction",
         "canonical.screen-model",
         "canonical.interaction-model",
         "visual.reference-set",
-        "pencil.workspace",
-        "design-system.tokens"
+        "pencil.wireframe-set",
+        "design-system.tokens",
+        "prototype.package"
       ],
       "reconcile": {
         "policy": "may-change",
@@ -231,7 +312,80 @@
           "exportedArtifacts",
           "deliveryChecklist"
         ],
-        "notes": "Handoff package is a downstream target only in Stage 04."
+        "notes": "Handoff package is a downstream target only in Stage 05."
+      }
+    },
+    {
+      "id": "log.reconcile-report",
+      "kind": "log",
+      "path": "autodesign/logs/reconcile-report.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": false,
+      "required": false,
+      "upstreamDependencies": [
+        "inputs.project-material",
+        "canonical.project-brief",
+        "canonical.requirements",
+        "canonical.brand-direction",
+        "canonical.screen-model",
+        "canonical.interaction-model",
+        "visual.reference-set",
+        "pencil.wireframe-set",
+        "design-system.tokens",
+        "prototype.package",
+        "handoff.package"
+      ],
+      "reconcile": {
+        "policy": "preserve",
+        "preserve": [
+          "manualReviewNotes"
+        ],
+        "mayChange": [],
+        "notes": "Reconcile report is a later-stage log target."
+      }
+    },
+    {
+      "id": "log.eval-report",
+      "kind": "log",
+      "path": "autodesign/logs/eval-report.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": false,
+      "required": false,
+      "upstreamDependencies": [
+        "handoff.package",
+        "log.reconcile-report"
+      ],
+      "reconcile": {
+        "policy": "preserve",
+        "preserve": [
+          "evalHistory",
+          "manualReviewNotes"
+        ],
+        "mayChange": [],
+        "notes": "Evaluation report is a later-stage log target."
+      }
+    },
+    {
+      "id": "log.skillopt-report",
+      "kind": "log",
+      "path": "autodesign/logs/skillopt-report.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": false,
+      "required": false,
+      "upstreamDependencies": [
+        "log.eval-report"
+      ],
+      "reconcile": {
+        "policy": "preserve",
+        "preserve": [
+          "optimizationHistory",
+          "manualReviewNotes"
+        ],
+        "mayChange": [],
+        "notes": "Skill optimization report is a later-stage log target."
       }
     }
   ]

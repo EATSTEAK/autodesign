@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-export const STAGE = "04-manifest-and-artifact-graph";
+export const STAGE = "05-subskill-contracts";
 export const DEFAULT_MANIFEST_REL = "autodesign/manifest.json";
 export const DEFAULT_GRAPH_REL = "autodesign/artifact-graph.json";
 
@@ -14,6 +14,7 @@ const VALID_ARTIFACT_KINDS = new Set([
   "visual-reference",
   "pencil",
   "design-system",
+  "prototype",
   "handoff",
   "log"
 ]);
@@ -34,6 +35,7 @@ const DISABLED_BEHAVIOR_KEYS = [
   "pencilOperations",
   "visualReferenceGeneration",
   "designSystemGeneration",
+  "prototypeGeneration",
   "handoff",
   "realSubskillPhaseBehavior"
 ];
@@ -41,7 +43,19 @@ const REFERENCE_ONLY_KINDS = new Set([
   "visual-reference",
   "pencil",
   "design-system",
+  "prototype",
   "handoff"
+]);
+const VALID_SUBSKILL_STATUSES = new Set([
+  "contract-only"
+]);
+const VALID_SUBSKILL_HARD_GATES = new Set([
+  "state.valid",
+  "graph.dependencies.valid",
+  "upstream-artifacts.exist",
+  "output-artifacts.declared",
+  "disabled-behaviors.enforced",
+  "no-real-phase-behavior"
 ]);
 
 export function resolveStatePaths(options = {}) {
@@ -165,6 +179,214 @@ export function checkDependencies(graph, artifactId = null) {
   }
 
   result.valid = result.missingDependencies.length === 0 && result.cycles.length === 0;
+  return result;
+}
+
+export async function checkSubskillCanRun(state, subskillName) {
+  const normalizedName = normalizeSubskillName(subskillName);
+  const validation = validateState(state);
+  const dependencyResult = validation.valid ? checkDependencies(state.graph) : null;
+  const contract = findSubskillContract(state.manifest, normalizedName);
+  const result = {
+    schemaVersion: 1,
+    stage: STAGE,
+    subskill: normalizedName,
+    contractPath: contract ? contract.path : null,
+    contractOnly: contract ? contract.contractOnly === true : null,
+    implemented: contract ? contract.implemented === true : null,
+    phaseBehaviorAllowed: false,
+    canRun: false,
+    checks: {
+      stateValid: validation.valid,
+      dependencyGraphValid: dependencyResult ? dependencyResult.valid : false,
+      upstreamArtifactsExist: false,
+      outputArtifactsDeclared: false,
+      disabledBehaviorsEnforced: false,
+      noRealPhaseBehavior: false
+    },
+    hardGates: [],
+    upstreamArtifacts: [],
+    outputArtifacts: [],
+    outputFiles: [],
+    disabledBehaviors: [],
+    errors: [],
+    warnings: [],
+    failFast: contract && Array.isArray(contract.failFast) ? [...contract.failFast] : []
+  };
+
+  if (!validation.valid) {
+    for (const error of validation.errors) {
+      result.errors.push({
+        check: "state.valid",
+        path: error.path,
+        message: error.message
+      });
+    }
+  }
+
+  if (dependencyResult && !dependencyResult.valid) {
+    for (const missing of dependencyResult.missingDependencies) {
+      result.errors.push({
+        check: "graph.dependencies.valid",
+        path: missing.artifactId,
+        message: `missing upstream dependency ${missing.missingUpstreamId}`
+      });
+    }
+    for (const cycle of dependencyResult.cycles) {
+      result.errors.push({
+        check: "graph.dependencies.valid",
+        path: "graph.artifacts",
+        message: `dependency cycle ${cycle.path.join(" -> ")}`
+      });
+    }
+  }
+
+  if (!contract) {
+    result.errors.push({
+      check: "subskill.contract",
+      path: "manifest.subskillContracts",
+      message: `unknown subskill ${normalizedName}`
+    });
+    return result;
+  }
+
+  const artifactIndex = buildArtifactIndex(state.graph);
+  const upstreamArtifacts = Array.isArray(contract.requiredUpstreamArtifacts) ? contract.requiredUpstreamArtifacts : [];
+  for (const artifactId of upstreamArtifacts) {
+    const artifact = artifactIndex.get(artifactId);
+    const entry = {
+      id: artifactId,
+      declared: Boolean(artifact),
+      path: artifact ? artifact.path : null,
+      exists: false
+    };
+
+    if (artifact) {
+      entry.exists = await pathExists(resolveAgainst(state.workspaceRoot, artifact.path));
+    }
+
+    result.upstreamArtifacts.push(entry);
+
+    if (!entry.declared) {
+      result.errors.push({
+        check: "upstream-artifacts.exist",
+        path: artifactId,
+        message: "required upstream artifact is not declared in artifact graph"
+      });
+      continue;
+    }
+
+    if (!entry.exists) {
+      result.errors.push({
+        check: "upstream-artifacts.exist",
+        path: artifact.path,
+        message: `required upstream artifact ${artifactId} is missing`
+      });
+    }
+  }
+
+  const outputArtifacts = Array.isArray(contract.outputArtifacts) ? contract.outputArtifacts : [];
+  for (const artifactId of outputArtifacts) {
+    const artifact = artifactIndex.get(artifactId);
+    const entry = {
+      id: artifactId,
+      declared: Boolean(artifact),
+      path: artifact ? artifact.path : null
+    };
+    result.outputArtifacts.push(entry);
+
+    if (!entry.declared) {
+      result.errors.push({
+        check: "output-artifacts.declared",
+        path: artifactId,
+        message: "output artifact is not declared in artifact graph"
+      });
+    }
+  }
+
+  const outputFiles = Array.isArray(contract.outputFiles) ? contract.outputFiles : [];
+  for (const outputFile of outputFiles) {
+    result.outputFiles.push({
+      path: outputFile
+    });
+  }
+
+  const disabledBehaviors = Array.isArray(contract.disabledBehaviors) ? contract.disabledBehaviors : [];
+  for (const key of disabledBehaviors) {
+    const enforced = state.manifest.disabledBehaviors && state.manifest.disabledBehaviors[key] === true;
+    result.disabledBehaviors.push({
+      key,
+      enforced
+    });
+    if (!enforced) {
+      result.errors.push({
+        check: "disabled-behaviors.enforced",
+        path: `manifest.disabledBehaviors.${key}`,
+        message: "required disabled behavior guard is not enabled"
+      });
+    }
+  }
+
+  const upstreamOk = result.upstreamArtifacts.every((artifact) => artifact.declared && artifact.exists);
+  const outputOk = result.outputArtifacts.every((artifact) => artifact.declared);
+  const disabledOk = result.disabledBehaviors.every((behavior) => behavior.enforced);
+  const noRealPhaseBehavior = contract.contractOnly === true
+    && contract.implemented === false
+    && state.manifest.disabledBehaviors
+    && state.manifest.disabledBehaviors.realSubskillPhaseBehavior === true;
+
+  result.checks.upstreamArtifactsExist = upstreamOk;
+  result.checks.outputArtifactsDeclared = outputOk;
+  result.checks.disabledBehaviorsEnforced = disabledOk;
+  result.checks.noRealPhaseBehavior = noRealPhaseBehavior;
+
+  if (!noRealPhaseBehavior) {
+    result.errors.push({
+      check: "no-real-phase-behavior",
+      path: "manifest.subskillContracts",
+      message: "Stage 05 subskill contracts must remain contract-only with real behavior disabled"
+    });
+  }
+
+  const hardGateStatus = {
+    "state.valid": result.checks.stateValid,
+    "graph.dependencies.valid": result.checks.dependencyGraphValid,
+    "upstream-artifacts.exist": result.checks.upstreamArtifactsExist,
+    "output-artifacts.declared": result.checks.outputArtifactsDeclared,
+    "disabled-behaviors.enforced": result.checks.disabledBehaviorsEnforced,
+    "no-real-phase-behavior": result.checks.noRealPhaseBehavior
+  };
+
+  for (const hardGate of Array.isArray(contract.hardGates) ? contract.hardGates : []) {
+    if (!VALID_SUBSKILL_HARD_GATES.has(hardGate)) {
+      result.errors.push({
+        check: "hard-gates.declared",
+        path: hardGate,
+        message: "unknown hard gate"
+      });
+      result.hardGates.push({
+        id: hardGate,
+        passed: false
+      });
+      continue;
+    }
+
+    result.hardGates.push({
+      id: hardGate,
+      passed: hardGateStatus[hardGate] === true
+    });
+  }
+
+  result.canRun = result.errors.length === 0;
+
+  if (result.canRun && contract.contractOnly === true) {
+    result.warnings.push({
+      check: "contract-only",
+      path: contract.path,
+      message: "Contract boundary can be entered, but real subskill behavior must not run in Stage 05."
+    });
+  }
+
   return result;
 }
 
@@ -369,6 +591,69 @@ export function formatDependencyResult(result) {
   return `${lines.join("\n")}\n`;
 }
 
+export function formatSubskillRunCheck(result) {
+  const lines = [
+    "Autodesign subskill run check",
+    `stage: ${result.stage}`,
+    `subskill: ${result.subskill}`,
+    `contract: ${result.contractPath || "unknown"}`,
+    `can run contract: ${result.canRun ? "yes" : "no"}`,
+    `contract only: ${result.contractOnly === true ? "yes" : "no"}`,
+    `phase behavior allowed: ${result.phaseBehaviorAllowed ? "yes" : "no"}`,
+    `errors: ${result.errors.length}`,
+    `warnings: ${result.warnings.length}`
+  ];
+
+  if (result.upstreamArtifacts.length > 0) {
+    lines.push("required upstream artifacts:");
+    for (const artifact of result.upstreamArtifacts) {
+      lines.push(`  ${artifact.id}: ${artifact.declared ? "declared" : "missing-declaration"}, ${artifact.exists ? "present" : "missing"}${artifact.path ? ` (${artifact.path})` : ""}`);
+    }
+  } else {
+    lines.push("required upstream artifacts: none");
+  }
+
+  if (result.outputArtifacts.length > 0) {
+    lines.push("output artifacts:");
+    for (const artifact of result.outputArtifacts) {
+      lines.push(`  ${artifact.id}: ${artifact.declared ? "declared" : "missing-declaration"}${artifact.path ? ` (${artifact.path})` : ""}`);
+    }
+  } else {
+    lines.push("output artifacts: none");
+  }
+
+  if (result.outputFiles.length > 0) {
+    lines.push("output files:");
+    for (const outputFile of result.outputFiles) {
+      lines.push(`  ${outputFile.path}`);
+    }
+  }
+
+  if (result.disabledBehaviors.length > 0) {
+    lines.push("disabled behavior guards:");
+    for (const behavior of result.disabledBehaviors) {
+      lines.push(`  ${behavior.key}: ${behavior.enforced ? "enforced" : "not-enforced"}`);
+    }
+  }
+
+  if (result.hardGates.length > 0) {
+    lines.push("hard gates:");
+    for (const gate of result.hardGates) {
+      lines.push(`  ${gate.id}: ${gate.passed ? "pass" : "fail"}`);
+    }
+  }
+
+  for (const error of result.errors) {
+    lines.push(`  error ${error.check} ${error.path}: ${error.message}`);
+  }
+
+  for (const warning of result.warnings) {
+    lines.push(`  warning ${warning.check} ${warning.path}: ${warning.message}`);
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
 export function formatDirtyResult(result) {
   const lines = [
     "Autodesign dirty artifact report",
@@ -502,6 +787,7 @@ function validateManifest(manifest, graph, result) {
 
   validateApprovalGates(manifest, result);
   validateDisabledBehaviors(manifest, result);
+  validateSubskillContracts(manifest, graph, result);
 
   if (!Array.isArray(manifest.notes)) {
     addError(result, "manifest.notes", "notes must be an array");
@@ -597,9 +883,82 @@ function validateDisabledBehaviors(manifest, result) {
 
   for (const key of DISABLED_BEHAVIOR_KEYS) {
     if (manifest.disabledBehaviors[key] !== true) {
-      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 04 must keep this behavior disabled");
+      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 05 must keep this behavior disabled");
     }
   }
+}
+
+function validateSubskillContracts(manifest, graph, result) {
+  const contracts = manifest.subskillContracts;
+  if (!Array.isArray(contracts)) {
+    addError(result, "manifest.subskillContracts", "subskillContracts must be an array");
+    return;
+  }
+
+  const names = new Set();
+  const artifactIndex = graph && Array.isArray(graph.artifacts) ? buildArtifactIndex(graph) : new Map();
+
+  contracts.forEach((contract, index) => {
+    const basePath = `manifest.subskillContracts[${index}]`;
+    if (!isObject(contract)) {
+      addError(result, basePath, "subskill contract must be an object");
+      return;
+    }
+
+    validateId(result, contract.name, `${basePath}.name`);
+    if (names.has(contract.name)) {
+      addError(result, `${basePath}.name`, "subskill name must be unique");
+    }
+    names.add(contract.name);
+
+    requireString(result, contract.path, `${basePath}.path`);
+
+    if (!VALID_SUBSKILL_STATUSES.has(contract.status)) {
+      addError(result, `${basePath}.status`, "status must be contract-only");
+    }
+
+    requireBoolean(result, contract.contractOnly, `${basePath}.contractOnly`);
+    requireBoolean(result, contract.implemented, `${basePath}.implemented`);
+
+    if (contract.contractOnly !== true) {
+      addError(result, `${basePath}.contractOnly`, "Stage 05 subskills must be contract-only");
+    }
+
+    if (contract.implemented !== false) {
+      addError(result, `${basePath}.implemented`, "Stage 05 subskills must not implement real behavior");
+    }
+
+    requireStringArray(result, contract.requiredUpstreamArtifacts, `${basePath}.requiredUpstreamArtifacts`);
+    requireStringArray(result, contract.outputArtifacts, `${basePath}.outputArtifacts`);
+    requireStringArray(result, contract.outputFiles, `${basePath}.outputFiles`);
+    requireStringArray(result, contract.hardGates, `${basePath}.hardGates`);
+    requireStringArray(result, contract.disabledBehaviors, `${basePath}.disabledBehaviors`);
+    requireStringArray(result, contract.failFast, `${basePath}.failFast`);
+
+    for (const artifactId of Array.isArray(contract.requiredUpstreamArtifacts) ? contract.requiredUpstreamArtifacts : []) {
+      if (!artifactIndex.has(artifactId)) {
+        addError(result, `${basePath}.requiredUpstreamArtifacts`, `unknown upstream artifact: ${artifactId}`);
+      }
+    }
+
+    for (const artifactId of Array.isArray(contract.outputArtifacts) ? contract.outputArtifacts : []) {
+      if (!artifactIndex.has(artifactId)) {
+        addError(result, `${basePath}.outputArtifacts`, `unknown output artifact: ${artifactId}`);
+      }
+    }
+
+    for (const hardGate of Array.isArray(contract.hardGates) ? contract.hardGates : []) {
+      if (!VALID_SUBSKILL_HARD_GATES.has(hardGate)) {
+        addError(result, `${basePath}.hardGates`, `unknown hard gate: ${hardGate}`);
+      }
+    }
+
+    for (const key of Array.isArray(contract.disabledBehaviors) ? contract.disabledBehaviors : []) {
+      if (!Object.prototype.hasOwnProperty.call(manifest.disabledBehaviors || {}, key)) {
+        addError(result, `${basePath}.disabledBehaviors`, `unknown disabled behavior guard: ${key}`);
+      }
+    }
+  });
 }
 
 function validateGraph(graph, result) {
@@ -649,7 +1008,7 @@ function validateGraph(graph, result) {
     validateReconcile(result, artifact.reconcile, `${basePath}.reconcile`);
 
     if (artifact.generated !== false) {
-      addError(result, `${basePath}.generated`, "Stage 04 graph entries must not mark artifacts as generated");
+      addError(result, `${basePath}.generated`, "Stage 05 graph entries must not mark artifacts as generated");
     }
 
     if (artifact.kind === "canonical" && artifact.sourceOfTruth !== true) {
@@ -657,7 +1016,7 @@ function validateGraph(graph, result) {
     }
 
     if (REFERENCE_ONLY_KINDS.has(artifact.kind) && artifact.referenceOnly !== true) {
-      addError(result, `${basePath}.referenceOnly`, "downstream visual/Pencil/DS/handoff artifacts must be reference-only in Stage 04");
+      addError(result, `${basePath}.referenceOnly`, "downstream visual/Pencil/DS/prototype/handoff artifacts must be reference-only in Stage 05");
     }
 
     result.counts.dependencies += Array.isArray(artifact.upstreamDependencies) ? artifact.upstreamDependencies.length : 0;
@@ -725,6 +1084,20 @@ function validateManifestGraphLinks(manifest, graph, result) {
       addError(result, "manifest.artifactGraph.referencesOnly", `${artifactId} is not marked referenceOnly in graph`);
     }
   }
+}
+
+function normalizeSubskillName(name) {
+  if (typeof name !== "string" || name.length === 0) {
+    throw new Error("--subskill requires a non-empty value.");
+  }
+
+  return name.startsWith("autodesign-") ? name.slice("autodesign-".length) : name;
+}
+
+function findSubskillContract(manifest, name) {
+  const normalizedName = normalizeSubskillName(name);
+  return (Array.isArray(manifest.subskillContracts) ? manifest.subskillContracts : [])
+    .find((contract) => contract && contract.name === normalizedName) || null;
 }
 
 function findDependencyCycles(graph) {
@@ -924,6 +1297,18 @@ function compareObjectsByKeys(keys) {
     }
     return 0;
   };
+}
+
+async function pathExists(filePath) {
+  try {
+    await fs.stat(filePath);
+    return true;
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      return false;
+    }
+    throw error;
+  }
 }
 
 function resolveAgainst(root, maybeRelativePath) {

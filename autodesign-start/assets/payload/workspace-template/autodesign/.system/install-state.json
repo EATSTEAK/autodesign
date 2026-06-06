@@ -1,13 +1,14 @@
 {
   "schemaVersion": 1,
-  "stage": "04-manifest-and-artifact-graph",
+  "stage": "05-subskill-contracts",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
-  "runtime": "bootstrap-and-state-only",
+  "runtime": "bootstrap-state-and-subskill-contracts",
   "materializedBy": "autodesign-start/assets/payload/scripts/bootstrap.mjs",
   "stateScripts": {
     "validateState": "autodesign-start/assets/payload/scripts/validate-state.mjs",
     "checkDependencies": "autodesign-start/assets/payload/scripts/check-dependencies.mjs",
+    "canRunSubskill": "autodesign-start/assets/payload/scripts/can-run-subskill.mjs",
     "recordGate": "autodesign-start/assets/payload/scripts/record-gate.mjs",
     "dirtyArtifacts": "autodesign-start/assets/payload/scripts/dirty-artifacts.mjs"
   },
@@ -38,6 +39,7 @@
     "pencilOperations": true,
     "visualReferenceGeneration": true,
     "designSystemGeneration": true,
+    "prototypeGeneration": true,
     "handoff": true,
     "realSubskillPhaseBehavior": true
   }

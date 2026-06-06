@@ -1,10 +1,10 @@
 ---
 name: autodesign-phase-placeholder
-description: Private Stage 04 placeholder for later Autodesign phase subskills. It intentionally performs no phase behavior.
+description: Legacy private placeholder retained for compatibility. Stage 05 uses concrete contract subskills and still performs no phase behavior.
 ---
 
-# Autodesign Phase Placeholder
+# Autodesign Legacy Phase Placeholder
 
-This private placeholder reserves the payload structure for later Autodesign phase subskills.
+This legacy private placeholder is retained for compatibility with Stage 04 payload shape. Stage 05 concrete contracts live beside it under `subskills/autodesign-*/SKILL.md`.
 
-When reached in Stage 04, report that the requested phase is unavailable until a later stage. Do not generate artifacts, call models, access Pencil, mutate design files, run hooks for behavior, or hand off work to another phase.
+When reached, report that concrete subskill contracts should be used instead. Do not generate artifacts, call models, access Pencil, mutate design files, run hooks for behavior, create prototypes, generate reports, or hand off work to another phase.

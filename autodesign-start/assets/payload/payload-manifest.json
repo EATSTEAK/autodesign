@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "04-manifest-and-artifact-graph",
+  "stage": "05-subskill-contracts",
   "publicSkills": [
     "autodesign-start"
   ],
@@ -40,6 +40,11 @@
       "writesFiles": false
     },
     {
+      "name": "can-run-subskill",
+      "command": "node autodesign-start/assets/payload/scripts/can-run-subskill.mjs --workspace <workspace> --subskill <name>",
+      "writesFiles": false
+    },
+    {
       "name": "dirty-artifacts",
       "command": "node autodesign-start/assets/payload/scripts/dirty-artifacts.mjs --workspace <workspace> --changed <artifact-id>",
       "writesFiles": false
@@ -74,13 +79,83 @@
     "subskills": [
       {
         "path": "subskills/autodesign-bootstrap-runtime/SKILL.md",
-        "status": "no-op-placeholder",
-        "purpose": "Private bootstrap runtime boundary documentation."
+        "status": "contract-only",
+        "purpose": "Private bootstrap/runtime helper contract."
+      },
+      {
+        "path": "subskills/autodesign-interview/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private interview subskill contract for canonical.project-brief."
+      },
+      {
+        "path": "subskills/autodesign-stories/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private stories subskill contract for canonical.requirements."
+      },
+      {
+        "path": "subskills/autodesign-brand/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private brand subskill contract for canonical.brand-direction."
+      },
+      {
+        "path": "subskills/autodesign-visuals/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private visuals subskill contract for visual.reference-set."
+      },
+      {
+        "path": "subskills/autodesign-views/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private views subskill contract for canonical.screen-model."
+      },
+      {
+        "path": "subskills/autodesign-ux/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private UX subskill contract for canonical.interaction-model."
+      },
+      {
+        "path": "subskills/autodesign-wireframe/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private wireframe subskill contract for pencil.wireframe-set."
+      },
+      {
+        "path": "subskills/autodesign-primitives/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private primitives subskill contract for design-system.primitives."
+      },
+      {
+        "path": "subskills/autodesign-ds/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private design-system subskill contract for design-system.tokens."
+      },
+      {
+        "path": "subskills/autodesign-prototype/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private prototype subskill contract for prototype.package."
+      },
+      {
+        "path": "subskills/autodesign-handoff/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private handoff subskill contract for handoff.package."
+      },
+      {
+        "path": "subskills/autodesign-reconcile/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private reconcile subskill contract for log.reconcile-report."
+      },
+      {
+        "path": "subskills/autodesign-eval/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private eval subskill contract for log.eval-report."
+      },
+      {
+        "path": "subskills/autodesign-skillopt/SKILL.md",
+        "status": "contract-only",
+        "purpose": "Private skill optimization subskill contract for log.skillopt-report."
       },
       {
         "path": "subskills/autodesign-phase-placeholder/SKILL.md",
-        "status": "no-op-placeholder",
-        "purpose": "Private placeholder for later Autodesign phase subskills."
+        "status": "legacy-placeholder",
+        "purpose": "Stage 04 placeholder retained for compatibility; concrete Stage 05 contracts are listed above."
       }
     ],
     "scripts": [
@@ -97,12 +172,17 @@
       {
         "path": "scripts/validate-state.mjs",
         "status": "implemented",
-        "purpose": "Validate manifest and artifact graph JSON plus Stage 04 semantic constraints."
+        "purpose": "Validate manifest and artifact graph JSON plus Stage 05 semantic constraints."
       },
       {
         "path": "scripts/check-dependencies.mjs",
         "status": "implemented",
         "purpose": "Check upstream dependency references and graph cycles."
+      },
+      {
+        "path": "scripts/can-run-subskill.mjs",
+        "status": "implemented",
+        "purpose": "Check whether a named private subskill contract can be entered from manifest and artifact graph state."
       },
       {
         "path": "scripts/dirty-artifacts.mjs",
@@ -154,12 +234,13 @@
     "pencilOperations": true,
     "visualReferenceGeneration": true,
     "designSystemGeneration": true,
+    "prototypeGeneration": true,
     "handoff": true,
     "realSubskillPhaseBehavior": true
   },
   "notes": [
     "autodesign-start is the only public skill at install time.",
-    "Stage 04 implements deterministic manifest and artifact graph state management only.",
-    "No canonical generation, image generation, Pencil operation, design-system work, handoff, or real phase behavior is implemented."
+    "Stage 05 implements private subskill contracts and deterministic readiness checks only.",
+    "No canonical generation, image generation, Pencil operation, design-system work, prototype generation, handoff, reconcile report generation, eval report generation, skill optimization, or real phase behavior is implemented."
   ]
 }

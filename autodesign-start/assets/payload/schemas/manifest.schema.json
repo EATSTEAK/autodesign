@@ -11,6 +11,7 @@
     "publicSkill",
     "workspace",
     "artifactGraph",
+    "subskillContracts",
     "approvalGates",
     "approvalRecords",
     "disabledBehaviors",
@@ -97,6 +98,12 @@
         "$ref": "#/$defs/approvalGate"
       }
     },
+    "subskillContracts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/subskillContract"
+      }
+    },
     "approvalRecords": {
       "type": "array",
       "items": {
@@ -117,6 +124,96 @@
     }
   },
   "$defs": {
+    "subskillContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "path",
+        "status",
+        "contractOnly",
+        "implemented",
+        "requiredUpstreamArtifacts",
+        "outputArtifacts",
+        "outputFiles",
+        "hardGates",
+        "disabledBehaviors",
+        "failFast"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]*$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "const": "contract-only"
+        },
+        "contractOnly": {
+          "const": true
+        },
+        "implemented": {
+          "const": false
+        },
+        "requiredUpstreamArtifacts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "outputArtifacts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "outputFiles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "hardGates": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "state.valid",
+              "graph.dependencies.valid",
+              "upstream-artifacts.exist",
+              "output-artifacts.declared",
+              "disabled-behaviors.enforced",
+              "no-real-phase-behavior"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "disabledBehaviors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "failFast": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
     "approvalGate": {
       "type": "object",
       "additionalProperties": false,
