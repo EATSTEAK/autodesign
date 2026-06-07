@@ -1,6 +1,6 @@
 # Payload Scripts
 
-Stage 09 includes deterministic bootstrap, state-management, subskill readiness, canonical generation, visual reference gate, Pencil, design-system, prototype, QA, refinement gate, handoff documentation, reconcile report, and advisory hook scripts.
+Stage 11 includes deterministic bootstrap, state-management, subskill readiness, canonical generation, visual reference gate, Pencil, design-system, prototype, QA, refinement gate, handoff documentation, reconcile report, SkillOpt hardening, and advisory hook scripts.
 
 ## Bootstrap
 
@@ -238,6 +238,31 @@ node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /a
 ```
 
 The reconcile action writes only `autodesign/logs/reconcile-report.json`. It uses artifact graph dirty propagation plus preserve/may-change policies and does not mutate upstream artifacts, design files, Pencil state, images, or frontend code.
+
+## Stage 11 SkillOpt Hardening
+
+SkillOpt reads `autodesign/logs/eval-report.json` only after E2E `PASS`, compares skill prompt/version outputs across golden cases, records accepted and rejected edits, and emits review-only patch proposals.
+
+Plan without writing:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-skillopt.mjs --workspace /absolute/path/to/project --plan
+```
+
+Apply only with explicit approval and deterministic record metadata:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-skillopt.mjs --workspace /absolute/path/to/project --apply --approve-skillopt-hardening --actor <actor> --at <timestamp>
+```
+
+The eval report must include `schemaVersion: 1`, `artifactId: "log.eval-report"`, `e2e.status: "PASS"`, and `goldenCases[].skillComparisons[]` entries with before/after prompt versions, output versions, output hashes, accept/reject decisions, target skill `SKILL.md` paths, rationales, and patch text for accepted edits.
+
+The SkillOpt action writes only:
+
+- `autodesign/logs/skillopt-report.json`
+- `autodesign/logs/skillopt-patch-proposals.json`
+
+It also updates `autodesign/manifest.json` and `autodesign/artifact-graph.json` state metadata. It does not apply patch proposals, mutate upstream skill files, generate frontend code, call image generation, call Pencil MCP, or create design assets.
 
 ## Advisory Hooks
 

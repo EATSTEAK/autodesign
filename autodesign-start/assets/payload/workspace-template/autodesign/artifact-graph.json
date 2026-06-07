@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "09-handoff-and-hooks",
+  "stage": "11-skillopt-hardening",
   "graphId": "autodesign-default-artifact-graph",
   "artifacts": [
     {
@@ -807,7 +807,28 @@
           "manualReviewNotes"
         ],
         "mayChange": [],
-        "notes": "Skill optimization report is a later-stage log target."
+        "notes": "SkillOpt report is generated in Stage 11 from an E2E PASS eval report and records accepted/rejected prompt-version edits."
+      }
+    },
+    {
+      "id": "log.skillopt-patch-proposals",
+      "kind": "log",
+      "path": "autodesign/logs/skillopt-patch-proposals.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": false,
+      "required": false,
+      "upstreamDependencies": [
+        "log.eval-report"
+      ],
+      "reconcile": {
+        "policy": "preserve",
+        "preserve": [
+          "proposalHistory",
+          "manualReviewNotes"
+        ],
+        "mayChange": [],
+        "notes": "SkillOpt patch proposals are generated in Stage 11 as review-only JSON. They are never applied automatically to upstream skill files."
       }
     }
   ]

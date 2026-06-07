@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "stage": "09-handoff-and-hooks",
+  "stage": "11-skillopt-hardening",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
-  "runtime": "bootstrap-state-subskill-contracts-canonical-visual-reference-pencil-ds-prototype-qa-refinement-handoff-reconcile-and-advisory-hooks",
+  "runtime": "bootstrap-state-subskill-contracts-canonical-visual-reference-pencil-ds-prototype-qa-refinement-handoff-reconcile-skillopt-and-advisory-hooks",
   "materializedBy": "autodesign-start/assets/payload/scripts/bootstrap.mjs",
   "stateScripts": {
     "validateState": "autodesign-start/assets/payload/scripts/validate-state.mjs",
@@ -14,7 +14,8 @@
     "generateCanonical": "autodesign-start/assets/payload/scripts/generate-canonical.mjs",
     "generateVisualReferences": "autodesign-start/assets/payload/scripts/generate-visual-references.mjs",
     "generatePencilPrototype": "autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs",
-    "generateHandoff": "autodesign-start/assets/payload/scripts/generate-handoff.mjs"
+    "generateHandoff": "autodesign-start/assets/payload/scripts/generate-handoff.mjs",
+    "generateSkillOpt": "autodesign-start/assets/payload/scripts/generate-skillopt.mjs"
   },
   "approvalGates": {
     "applyRequires": [
@@ -105,6 +106,12 @@
       "--approve-reconcile-report",
       "--actor",
       "--at"
+    ],
+    "skillOptHardeningRequires": [
+      "--approve-skillopt-hardening",
+      "--actor",
+      "--at",
+      "eval-report.e2e-pass"
     ]
   },
   "materializedFiles": [

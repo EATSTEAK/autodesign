@@ -1,6 +1,6 @@
 ---
 name: autodesign-start
-description: Start Autodesign setup from the eatsteak/autodesign skill package. Use when the user asks to initialize, start, install-check, bootstrap, validate state, inspect the artifact graph, check subskill readiness, record gates, compute dirty artifacts, generate canonical artifacts, run visual reference gates, run Pencil/DS/prototype/QA metadata records, generate frontend handoff docs, or generate reconcile reports.
+description: Start Autodesign setup from the eatsteak/autodesign skill package. Use when the user asks to initialize, start, install-check, bootstrap, validate state, inspect the artifact graph, check subskill readiness, record gates, compute dirty artifacts, generate canonical artifacts, run visual reference gates, run Pencil/DS/prototype/QA metadata records, generate frontend handoff docs, generate reconcile reports, or generate SkillOpt hardening reports.
 ---
 
 # Autodesign Start
@@ -9,9 +9,11 @@ This is the only public skill exposed by the `eatsteak/autodesign` package at in
 
 ## Current Stage
 
-Stage 09 provides a one-shot bootstrap runtime that materializes the bundled Autodesign workspace template into a target project, deterministic manifest and artifact graph state-management scripts, private subskill readiness checks, canonical artifact generation from real project input files, visual reference prompt/candidate/selection record gates, Stage 08 Pencil/DS/prototype/QA metadata workflows, Stage 09 frontend handoff documentation, reconcile reports, and read-only advisory hooks.
+Stage 11 provides a one-shot bootstrap runtime that materializes the bundled Autodesign workspace template into a target project, deterministic manifest and artifact graph state-management scripts, private subskill readiness checks, canonical artifact generation from real project input files, visual reference prompt/candidate/selection record gates, Stage 08 Pencil/DS/prototype/QA metadata workflows, Stage 09 frontend handoff documentation, reconcile reports, Stage 11 SkillOpt hardening reports, and read-only advisory hooks.
 
 Allowed Stage 09 generation is limited to canonical planning artifacts, visual reference records, Pencil live-check records, wireframe/prototype metadata, canvas export path records, primitive inventory, DS tokens/contracts, semantic visual QA, max-two-refinement records, JSON/Markdown frontend handoff documentation, and advisory reconcile reports. Pencil canvas edits and exports are performed by the active agent through Pencil; scripts only record real evidence and fail fast when live-check evidence, active `batch_design`/`export_nodes` evidence, an Autodesign-owned virtual `.pen` filePath, created/exported node bindings, or real export files are missing. Handoff must not create frontend source files or executable prototype code.
+
+Allowed Stage 11 SkillOpt behavior is limited to reading an E2E PASS eval report, comparing skill prompt/version outputs on golden cases, recording accepted/rejected edits, and writing review-only patch proposal JSON. SkillOpt does not apply upstream skill edits, generate frontend code, call image generation, call Pencil MCP, or create design assets.
 
 ## Bundled Payload
 
@@ -24,6 +26,7 @@ Runtime assets live under `assets/payload/`:
 - `scripts/generate-visual-references.mjs` for visual reference prompt, candidate, and selected-reference records.
 - `scripts/generate-pencil-prototype.mjs` for Stage 08 Pencil live-check, wireframe, primitive, DS, prototype, QA, and refinement-gate records.
 - `scripts/generate-handoff.mjs` for Stage 09 frontend handoff documentation and reconcile reports.
+- `scripts/generate-skillopt.mjs` for Stage 11 SkillOpt hardening reports and review-only patch proposals.
 - `scripts/validate-state.mjs`, `scripts/check-dependencies.mjs`, `scripts/can-run-subskill.mjs`, `scripts/record-gate.mjs`, and `scripts/dirty-artifacts.mjs` for state and contract readiness management.
 - `hooks/` for read-only advisory hook adapters.
 - `workspace-template/` for files materialized by the bootstrap runtime.
@@ -169,6 +172,22 @@ node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /a
 
 Handoff writes only `autodesign/outputs/handoff/handoff-package.json` and `autodesign/outputs/handoff/README.md`. Reconcile writes only `autodesign/logs/reconcile-report.json`. Neither action may mutate upstream artifacts, call image generation, call Pencil MCP, or create frontend code.
 
+## Stage 11 SkillOpt
+
+Run `generate-skillopt.mjs --plan` after `autodesign/logs/eval-report.json` exists and reports E2E `PASS`:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-skillopt.mjs --workspace /absolute/path/to/project --plan
+```
+
+Apply only with explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-skillopt.mjs --workspace /absolute/path/to/project --apply --approve-skillopt-hardening --actor <actor> --at <timestamp>
+```
+
+SkillOpt writes only `autodesign/logs/skillopt-report.json`, `autodesign/logs/skillopt-patch-proposals.json`, and state metadata. Patch proposals are manual-review artifacts only.
+
 ## Advisory Hooks
 
 The materialized hooks are read-only adapters:
@@ -203,3 +222,4 @@ The bootstrap runtime copies `assets/payload/workspace-template/` into the targe
 8. For visual reference requests, run `generate-visual-references.mjs --plan` first. Apply prompt, candidate, or selection records only with that action's explicit approval flag.
 9. For Pencil, DS, prototype, or QA requests, run `generate-pencil-prototype.mjs --plan` first. Apply only with the action-specific approval flag, `--actor`, and `--at`.
 10. For handoff or reconcile requests, run `generate-handoff.mjs --plan` first. Apply only with the action-specific approval flag, `--actor`, and `--at`.
+11. For SkillOpt requests, run `can-run-subskill.mjs --subskill skillopt`, then `generate-skillopt.mjs --plan`. Apply only with `--approve-skillopt-hardening`, `--actor`, and `--at`.

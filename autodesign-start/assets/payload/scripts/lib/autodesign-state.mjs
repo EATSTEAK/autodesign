@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-export const STAGE = "09-handoff-and-hooks";
+export const STAGE = "11-skillopt-hardening";
 export const DEFAULT_MANIFEST_REL = "autodesign/manifest.json";
 export const DEFAULT_GRAPH_REL = "autodesign/artifact-graph.json";
 
@@ -82,6 +82,7 @@ const VALID_SUBSKILL_HARD_GATES = new Set([
   "prototype-package.generated",
   "prototype-visual-qa.generated",
   "handoff-package.generated",
+  "eval-report.e2e-pass",
   "prototype-refinement-limit.valid",
   "no-real-phase-behavior"
 ]);
@@ -257,6 +258,7 @@ export async function checkSubskillCanRun(state, subskillName) {
       prototypePackageGenerated: false,
       prototypeVisualQaGenerated: false,
       handoffPackageGenerated: false,
+      evalReportE2ePass: false,
       prototypeRefinementLimitValid: false,
       noRealPhaseBehavior: false
     },
@@ -319,6 +321,7 @@ export async function checkSubskillCanRun(state, subskillName) {
   result.checks.prototypePackageGenerated = await detectPencilEvidenceArtifactGenerated(state, "prototype.package", "pencil-mcp-prototype-generation");
   result.checks.prototypeVisualQaGenerated = await detectGeneratedArtifactPresent(state, "prototype.visual-qa-report");
   result.checks.handoffPackageGenerated = await detectGeneratedArtifactPresent(state, "handoff.package");
+  result.checks.evalReportE2ePass = await detectEvalReportE2ePass(state);
   result.checks.prototypeRefinementLimitValid = await detectPrototypeRefinementLimitValid(state);
 
   const artifactIndex = buildArtifactIndex(state.graph);
@@ -452,6 +455,7 @@ export async function checkSubskillCanRun(state, subskillName) {
     "prototype-package.generated": result.checks.prototypePackageGenerated,
     "prototype-visual-qa.generated": result.checks.prototypeVisualQaGenerated,
     "handoff-package.generated": result.checks.handoffPackageGenerated,
+    "eval-report.e2e-pass": result.checks.evalReportE2ePass,
     "prototype-refinement-limit.valid": result.checks.prototypeRefinementLimitValid,
     "no-real-phase-behavior": result.checks.noRealPhaseBehavior
   };
@@ -720,6 +724,7 @@ export function formatSubskillRunCheck(result) {
     `prototype generation enabled: ${result.checks.prototypeGenerationEnabled ? "yes" : "no"}`,
     `handoff disabled: ${result.checks.handoffDisabled ? "yes" : "no"}`,
     `handoff enabled: ${result.checks.handoffEnabled ? "yes" : "no"}`,
+    `eval report E2E pass: ${result.checks.evalReportE2ePass ? "yes" : "no"}`,
     `errors: ${result.errors.length}`,
     `warnings: ${result.warnings.length}`
   ];
@@ -1538,6 +1543,28 @@ async function detectGeneratedArtifactPresent(state, artifactId) {
   }
 
   return pathExists(resolveAgainst(state.workspaceRoot, artifact.path));
+}
+
+async function detectEvalReportE2ePass(state) {
+  const artifact = buildArtifactIndex(state.graph).get("log.eval-report");
+  if (!artifact) {
+    return false;
+  }
+
+  const reportPath = resolveAgainst(state.workspaceRoot, artifact.path);
+  if (!await pathExists(reportPath)) {
+    return false;
+  }
+
+  let report;
+  try {
+    report = await readJsonFile(reportPath);
+  } catch (error) {
+    return false;
+  }
+
+  const status = report.e2e?.status;
+  return typeof status === "string" && status.toUpperCase() === "PASS";
 }
 
 async function detectPencilLiveCheckGenerated(state) {

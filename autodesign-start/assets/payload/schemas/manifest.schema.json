@@ -220,6 +220,7 @@
               "prototype-package.generated",
               "prototype-visual-qa.generated",
               "handoff-package.generated",
+              "eval-report.e2e-pass",
               "prototype-refinement-limit.valid",
               "no-real-phase-behavior"
             ]

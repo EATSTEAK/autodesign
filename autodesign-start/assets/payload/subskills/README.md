@@ -1,6 +1,6 @@
 # Payload Subskills
 
-Stage 09 includes concrete private subskill contracts.
+Stage 11 includes concrete private subskill contracts.
 
 These subskills are not public install-time skills. `autodesign-start` remains the only public router.
 
@@ -23,4 +23,6 @@ The canonical subskills `interview`, `stories`, `brand`, `views`, `ux`, and `vis
 
 The `wireframe`, `primitives`, `ds`, `prototype`, and `qa` subskills are implemented through `scripts/generate-pencil-prototype.mjs`. These Stage 08 actions require approved selected visual references; Pencil-derived actions also require a live Pencil MCP handoff with `get_editor_state`, `batch_design`, and `export_nodes`, an Autodesign-owned virtual `.pen` filePath, created/exported node bindings, and real canvas export paths.
 
-The `handoff` and `reconcile` subskills are implemented through `scripts/generate-handoff.mjs`. Handoff writes JSON and Markdown documentation only. Reconcile writes an advisory JSON report only. Eval and skill optimization remain later-stage contracts.
+The `handoff` and `reconcile` subskills are implemented through `scripts/generate-handoff.mjs`. Handoff writes JSON and Markdown documentation only. Reconcile writes an advisory JSON report only.
+
+The `skillopt` subskill is implemented through `scripts/generate-skillopt.mjs`. It requires an E2E PASS eval report, records accepted/rejected prompt-version edits, and writes review-only patch proposal JSON. Eval remains a later-stage upstream contract.

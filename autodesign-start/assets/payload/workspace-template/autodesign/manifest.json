@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "09-handoff-and-hooks",
+  "stage": "11-skillopt-hardening",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
   "workspace": {
@@ -670,32 +670,36 @@
     {
       "name": "skillopt",
       "path": "subskills/autodesign-skillopt/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "log.eval-report"
       ],
       "outputArtifacts": [
-        "log.skillopt-report"
+        "log.skillopt-report",
+        "log.skillopt-patch-proposals"
       ],
-      "outputFiles": [],
+      "outputFiles": [
+        "autodesign/logs/skillopt-report.json",
+        "autodesign/logs/skillopt-patch-proposals.json"
+      ],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "eval-report.e2e-pass"
       ],
-      "disabledBehaviors": [
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
+        "Stop if autodesign/logs/eval-report.json does not have e2e.status PASS.",
+        "Run scripts/generate-skillopt.mjs in plan mode before apply.",
+        "Write only autodesign/logs/skillopt-report.json and autodesign/logs/skillopt-patch-proposals.json, plus manifest/graph state.",
+        "Do not apply patch proposals, mutate upstream skill files, generate frontend code, call image generation, or call Pencil MCP."
       ]
     }
   ],
@@ -1077,6 +1081,26 @@
       "actor": null,
       "note": "Reconcile report is advisory and uses dirty propagation plus preserve/may-change policies without mutating upstream artifacts.",
       "history": []
+    },
+    {
+      "id": "skillopt.proposals",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "log.skillopt-report",
+        "log.skillopt-patch-proposals"
+      ],
+      "requires": [
+        "eval-report.e2e-pass",
+        "--approve-skillopt-hardening",
+        "--actor",
+        "--at"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "SkillOpt writes deterministic report/proposal JSON only after eval E2E PASS and never applies upstream skill edits automatically.",
+      "history": []
     }
   ],
   "approvalRecords": [],
@@ -1096,7 +1120,8 @@
     "Scripts persist metadata, canvas export path records, primitive inventory, DS tokens/contracts, semantic visual QA, and the max-two-refinement gate only after live Pencil evidence cross-checks the virtual Pencil filePath and actual export file bytes.",
     "Scripts never create or fake Pencil canvas output and fail fast when live Pencil evidence, created/exported node bindings, or real export files are missing.",
     "Stage 09 handoff writes JSON and Markdown documentation only under autodesign/outputs/handoff and does not generate frontend source files or executable prototype code.",
-    "Stage 09 reconcile reports are advisory JSON logs and do not mutate upstream artifacts."
+    "Stage 09 reconcile reports are advisory JSON logs and do not mutate upstream artifacts.",
+    "Stage 11 SkillOpt writes review-only report and patch proposal JSON after eval E2E PASS; it does not apply upstream skill edits, generate frontend code, call image generation, or call Pencil MCP."
   ],
   "generationRecords": []
 }

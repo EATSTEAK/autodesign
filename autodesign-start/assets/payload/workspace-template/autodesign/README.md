@@ -1,6 +1,6 @@
 # Autodesign Runtime Workspace
 
-This directory is the materialized Autodesign workspace for Stage 09 manifest, artifact graph, private subskill contract, canonical pipeline, visual reference, Pencil, design-system, prototype, QA, refinement, handoff, reconcile, and advisory hook state management.
+This directory is the materialized Autodesign workspace for Stage 11 manifest, artifact graph, private subskill contract, canonical pipeline, visual reference, Pencil, design-system, prototype, QA, refinement, handoff, reconcile, SkillOpt, and advisory hook state management.
 
 - `.system/install-state.json` records the installed bootstrap state.
 - `manifest.json` records workspace state, private subskill contracts, approval gates, generation records, and disabled behaviors.
@@ -14,7 +14,8 @@ This directory is the materialized Autodesign workspace for Stage 09 manifest, a
 - `outputs/handoff/` stores Stage 09 JSON and Markdown frontend handoff documentation.
 - `logs/decision-log.json` is created and updated by the canonical pipeline.
 - `logs/reconcile-report.json` is created by the Stage 09 reconcile report action.
+- `logs/skillopt-report.json` and `logs/skillopt-patch-proposals.json` are created by the Stage 11 SkillOpt hardening action after eval E2E PASS.
 
 Stage 09 requires approved selected visual references before Pencil, DS, prototype, QA, handoff, or reconcile records. Pencil-derived records require real Pencil `get_editor_state`, `batch_design`, and `export_nodes` evidence, an Autodesign-owned virtual `.pen` filePath under `autodesign/outputs/pencil/`, created/exported node bindings, and existing canvas export files.
 
-The scripts persist metadata, documentation, and path records only. They do not create or fake Pencil canvas output, generate executable prototype code, or create frontend source files. Without completed Stage 08 Pencil/DS/prototype/QA prerequisites, Stage 09 handoff and reconcile actions remain blocked.
+The scripts persist metadata, documentation, reports, proposals, and path records only. They do not create or fake Pencil canvas output, generate executable prototype code, create frontend source files, call image generation, or apply SkillOpt patch proposals automatically. Without completed Stage 08 Pencil/DS/prototype/QA prerequisites, Stage 09 handoff and reconcile actions remain blocked.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "09-handoff-and-hooks",
+  "stage": "11-skillopt-hardening",
   "publicSkills": [
     "autodesign-start"
   ],
@@ -217,6 +217,19 @@
       "requiresApproval": [
         "--approve-reconcile-report"
       ]
+    },
+    {
+      "name": "generate-skillopt-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-skillopt.mjs --workspace <workspace> --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "generate-skillopt-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-skillopt.mjs --workspace <workspace> --apply --approve-skillopt-hardening --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-skillopt-hardening"
+      ]
     }
   ],
   "payload": {
@@ -310,8 +323,8 @@
       },
       {
         "path": "subskills/autodesign-skillopt/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private skill optimization subskill contract for log.skillopt-report."
+        "status": "implemented",
+        "purpose": "Private skill optimization subskill for deterministic E2E PASS hardening reports and review-only patch proposals."
       },
       {
         "path": "subskills/autodesign-phase-placeholder/SKILL.md",
@@ -379,6 +392,11 @@
         "path": "scripts/generate-handoff.mjs",
         "status": "implemented",
         "purpose": "Stage 09 frontend handoff documentation and reconcile report workflow."
+      },
+      {
+        "path": "scripts/generate-skillopt.mjs",
+        "status": "implemented",
+        "purpose": "Stage 11 SkillOpt hardening report and review-only patch proposal workflow after eval E2E PASS."
       }
     ],
     "hooks": [
@@ -508,6 +526,12 @@
       "--actor",
       "--at",
       "handoff.package.generated"
+    ],
+    "skillOptHardeningRequires": [
+      "--approve-skillopt-hardening",
+      "--actor",
+      "--at",
+      "eval-report.e2e-pass"
     ]
   },
   "disabledBehaviors": {
@@ -528,6 +552,7 @@
     "Primitive inventory, DS tokens/contracts, prototype metadata, semantic QA, and max-two-refinement records are deterministic metadata artifacts.",
     "Stage 09 handoff writes JSON and Markdown documentation only under autodesign/outputs/handoff and does not generate frontend source files or executable prototype code.",
     "Stage 09 hooks are observational/advisory only and do not generate artifacts, call image generation, call Pencil MCP, mutate design files, or produce frontend code.",
-    "Eval report and skill optimization remain later-stage outputs."
+    "Eval report remains a later-stage upstream output.",
+    "Stage 11 SkillOpt reads only E2E PASS eval reports, records accepted/rejected prompt-version edits, and writes review-only patch proposal JSON without applying upstream changes."
   ]
 }

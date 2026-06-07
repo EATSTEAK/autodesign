@@ -1,6 +1,6 @@
 # Autodesign Workspace
 
-This project has been materialized by the Autodesign Stage 09 bootstrap, state, subskill contract, canonical pipeline, visual reference gate, Pencil, design-system, prototype, QA, refinement, handoff, reconcile, and advisory hook runtime.
+This project has been materialized by the Autodesign Stage 11 bootstrap, state, subskill contract, canonical pipeline, visual reference gate, Pencil, design-system, prototype, QA, refinement, handoff, reconcile, SkillOpt, and advisory hook runtime.
 
 Allowed Stage 09 behavior:
 
@@ -16,15 +16,16 @@ Allowed Stage 09 behavior:
 - Run `generate-pencil-prototype.mjs --action primitives`, `ds`, `prototype`, or `qa` only with the action-specific approval flag, `--actor`, and `--at`.
 - Run `generate-handoff.mjs --action handoff` only after Stage 08 artifacts and prototype QA/refinement gates exist; apply requires `--approve-handoff-generation`, `--actor`, and `--at`.
 - Run `generate-handoff.mjs --action reconcile` only after handoff docs exist; apply requires `--changed`, `--approve-reconcile-report`, `--actor`, and `--at`.
+- Run `generate-skillopt.mjs` only after `autodesign/logs/eval-report.json` exists with E2E `PASS`; apply requires `--approve-skillopt-hardening`, `--actor`, and `--at`.
 - Inspect `.codex/config.toml` and `.codex/hooks/*.mjs`.
 - Use the bootstrap script to re-plan or re-apply template files with explicit approval gates.
 
-Not implemented in Stage 09:
+Still not implemented:
 
 - Executable prototype implementation files.
 - Fake Pencil canvas output.
 - Evaluation report generation.
-- Skill optimization.
+- Automatic upstream SkillOpt patch application.
 
 Bootstrap approval remains separate from any later generation approval.
 
@@ -35,3 +36,5 @@ Visual reference scripts persist prompt text, active-agent image-generation inst
 Stage 09 scripts require approved selected visual references before Pencil, DS, prototype, QA, handoff, or reconcile records. Pencil-derived records require live Pencil MCP tool evidence and real files; if Pencil is unavailable, Stage 08-derived prerequisites remain NOT READY and scripts fail fast instead of fabricating output.
 
 Handoff generation writes JSON and Markdown documentation only under `autodesign/outputs/handoff`. Reconcile generation writes an advisory JSON report only under `autodesign/logs/reconcile-report.json`. Hooks are observational/advisory only and must not generate artifacts, call image generation, call Pencil MCP, mutate design files, or create frontend code.
+
+SkillOpt generation writes only `autodesign/logs/skillopt-report.json`, `autodesign/logs/skillopt-patch-proposals.json`, and state metadata. Patch proposals are review-only artifacts and must not be applied automatically.

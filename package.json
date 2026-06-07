@@ -2,7 +2,7 @@
   "name": "autodesign-skill-package",
   "version": "0.0.0",
   "private": true,
-  "description": "Stage 08 Pencil prototype and design-system runtime for the eatsteak/autodesign installable Codex skill package.",
+  "description": "Stage 11 SkillOpt hardening runtime for the eatsteak/autodesign installable Codex skill package.",
   "repository": {
     "type": "git",
     "url": "https://github.com/eatsteak/autodesign.git"

@@ -6,13 +6,15 @@ Installable Codex skill package for `eatsteak/autodesign`.
 
 `autodesign-start/` is the only public skill exposed at install time. Runtime assets, private expanded subskill contracts, scripts, hooks, and workspace files are bundled under `autodesign-start/assets/payload/`.
 
-Stage 09 implements bootstrap workspace materialization, deterministic manifest and artifact graph state management, private subskill readiness checks, canonical pipeline generation from real project input files, visual reference gates, Pencil/DS/prototype/QA metadata records, frontend handoff documentation, reconcile reports, and advisory hooks. Canonical generation emits project brief/interview intent, requirements/stories, brand direction, UX rules, screen model, interaction model, coverage matrix, decision log, navigation, screen-state matrix, and unapproved primary visual anchor proposals.
+Stage 11 implements bootstrap workspace materialization, deterministic manifest and artifact graph state management, private subskill readiness checks, canonical pipeline generation from real project input files, visual reference gates, Pencil/DS/prototype/QA metadata records, frontend handoff documentation, reconcile reports, SkillOpt hardening reports, and advisory hooks. Canonical generation emits project brief/interview intent, requirements/stories, brand direction, UX rules, screen model, interaction model, coverage matrix, decision log, navigation, screen-state matrix, and unapproved primary visual anchor proposals.
 
 Visual reference gates add prompt, candidate, and selected-reference records. Prompt records instruct the active agent to generate real images without hardcoding an image model. Candidate records persist only real generated output paths and review metadata. Selected references require explicit user approval and cannot be auto-selected.
 
 Stage 08 adds a `generate-pencil-prototype.mjs` script for Pencil live-check records, wireframe metadata, canvas export path records, primitive inventory, DS tokens/contracts, prototype metadata, semantic visual QA, and a max-two-refinement gate. Pencil canvas work remains live-agent work through Pencil; scripts fail fast if live Pencil evidence, active `batch_design` frame evidence, `export_nodes` node bindings, an Autodesign-owned virtual `.pen` filePath, or real export files are missing.
 
 Stage 09 adds `generate-handoff.mjs` for JSON/Markdown frontend handoff documentation and advisory reconcile reports. It never writes frontend source files, executable prototype code, images, or Pencil canvas changes. Stage 09 hooks are read-only adapters for status injection, lightweight schema validation, overwrite warnings, turn summaries, and reconcile alerts.
+
+Stage 11 adds `generate-skillopt.mjs` for the SkillOpt hardening loop. It reads only an E2E PASS eval report, compares skill prompt/version outputs across golden cases, records accepted/rejected edits, and writes review-only patch proposal JSON. It never applies upstream skill edits, writes frontend code, calls image generation, calls Pencil MCP, or creates design assets.
 
 ## Bootstrap Runtime
 
@@ -49,7 +51,7 @@ The bootstrap script materializes `AGENTS.md`, `.codex/config.toml`, `.codex/hoo
 
 ## Manifest And Artifact Graph
 
-Stage 09 materializes:
+The current runtime materializes:
 
 - `autodesign/manifest.json`
 - `autodesign/artifact-graph.json`
@@ -160,3 +162,19 @@ node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /a
 ```
 
 Handoff outputs are limited to `autodesign/outputs/handoff/handoff-package.json` and `autodesign/outputs/handoff/README.md`. Reconcile output is limited to `autodesign/logs/reconcile-report.json`.
+
+## Stage 11 SkillOpt
+
+Plan SkillOpt after `autodesign/logs/eval-report.json` exists and reports E2E `PASS`:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-skillopt.mjs --workspace /absolute/path/to/project --plan
+```
+
+Apply only with explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-skillopt.mjs --workspace /absolute/path/to/project --apply --approve-skillopt-hardening --actor <actor> --at <timestamp>
+```
+
+SkillOpt output is limited to `autodesign/logs/skillopt-report.json` and `autodesign/logs/skillopt-patch-proposals.json`, plus manifest/graph state metadata.
