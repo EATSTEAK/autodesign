@@ -6,4 +6,4 @@ Visual reference prompt, candidate, and selected-reference records are created u
 
 Stage 08 records Pencil live-checks, wireframe metadata, and canvas export path records under `outputs/pencil/`; primitive inventory and DS tokens/contracts under `outputs/design-system/`; and prototype metadata, canvas export path records, visual QA, and refinement logs under `outputs/prototype/`.
 
-Frontend handoff packages are not generated in Stage 08.
+Stage 09 writes frontend handoff documentation under `outputs/handoff/` as JSON and Markdown only. It does not create frontend source files, executable prototype code, images, or Pencil canvas changes.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "08-pencil-prototype-and-design-system",
+  "stage": "09-handoff-and-hooks",
   "graphId": "autodesign-default-artifact-graph",
   "artifacts": [
     {
@@ -603,7 +603,7 @@
           "interactionBindings",
           "previewMetadata"
         ],
-        "notes": "Prototype metadata records semantic bindings and Pencil export paths only; frontend handoff is disabled."
+        "notes": "Prototype metadata records semantic bindings and Pencil export paths only; frontend handoff documentation is generated separately in Stage 09."
       }
     },
     {
@@ -723,7 +723,7 @@
           "exportedArtifacts",
           "deliveryChecklist"
         ],
-        "notes": "Handoff package remains a later-stage target and is not generated in Stage 08."
+        "notes": "Handoff package is generated in Stage 09 as JSON and Markdown documentation only; it never contains frontend source files or executable prototype code."
       }
     },
     {
@@ -764,7 +764,7 @@
           "manualReviewNotes"
         ],
         "mayChange": [],
-        "notes": "Reconcile report is a later-stage log target."
+        "notes": "Reconcile report is generated in Stage 09 from dirty propagation and preserve/may-change policies without mutating upstream artifacts."
       }
     },
     {

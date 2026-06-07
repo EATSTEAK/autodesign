@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-export const STAGE = "08-pencil-prototype-and-design-system";
+export const STAGE = "09-handoff-and-hooks";
 export const DEFAULT_MANIFEST_REL = "autodesign/manifest.json";
 export const DEFAULT_GRAPH_REL = "autodesign/artifact-graph.json";
 
@@ -46,14 +46,12 @@ const REFERENCE_ONLY_KINDS = new Set([
   "prototype",
   "handoff"
 ]);
-const STAGE_08_ENABLED_BEHAVIOR_KEYS = new Set([
+const STAGE_09_ENABLED_BEHAVIOR_KEYS = new Set([
   "pencilOperations",
   "designSystemGeneration",
   "prototypeGeneration",
+  "handoff",
   "realSubskillPhaseBehavior"
-]);
-const STAGE_08_DISABLED_BEHAVIOR_KEYS = new Set([
-  "handoff"
 ]);
 const VALID_SUBSKILL_STATUSES = new Set([
   "contract-only",
@@ -75,6 +73,7 @@ const VALID_SUBSKILL_HARD_GATES = new Set([
   "design-system-generation.enabled",
   "prototype-generation.enabled",
   "handoff.disabled",
+  "handoff.enabled",
   "pencil-live-check.generated",
   "pencil-wireframes.generated",
   "design-system-primitives.generated",
@@ -82,6 +81,7 @@ const VALID_SUBSKILL_HARD_GATES = new Set([
   "design-system-contracts.generated",
   "prototype-package.generated",
   "prototype-visual-qa.generated",
+  "handoff-package.generated",
   "prototype-refinement-limit.valid",
   "no-real-phase-behavior"
 ]);
@@ -247,6 +247,8 @@ export async function checkSubskillCanRun(state, subskillName) {
         && state.manifest.disabledBehaviors.prototypeGeneration === false,
       handoffDisabled: state.manifest.disabledBehaviors
         && state.manifest.disabledBehaviors.handoff === true,
+      handoffEnabled: state.manifest.disabledBehaviors
+        && state.manifest.disabledBehaviors.handoff === false,
       pencilLiveCheckGenerated: false,
       pencilWireframesGenerated: false,
       designSystemPrimitivesGenerated: false,
@@ -254,6 +256,7 @@ export async function checkSubskillCanRun(state, subskillName) {
       designSystemContractsGenerated: false,
       prototypePackageGenerated: false,
       prototypeVisualQaGenerated: false,
+      handoffPackageGenerated: false,
       prototypeRefinementLimitValid: false,
       noRealPhaseBehavior: false
     },
@@ -315,6 +318,7 @@ export async function checkSubskillCanRun(state, subskillName) {
   result.checks.designSystemContractsGenerated = await detectGeneratedArtifactPresent(state, "design-system.contracts");
   result.checks.prototypePackageGenerated = await detectPencilEvidenceArtifactGenerated(state, "prototype.package", "pencil-mcp-prototype-generation");
   result.checks.prototypeVisualQaGenerated = await detectGeneratedArtifactPresent(state, "prototype.visual-qa-report");
+  result.checks.handoffPackageGenerated = await detectGeneratedArtifactPresent(state, "handoff.package");
   result.checks.prototypeRefinementLimitValid = await detectPrototypeRefinementLimitValid(state);
 
   const artifactIndex = buildArtifactIndex(state.graph);
@@ -439,6 +443,7 @@ export async function checkSubskillCanRun(state, subskillName) {
     "design-system-generation.enabled": result.checks.designSystemGenerationEnabled,
     "prototype-generation.enabled": result.checks.prototypeGenerationEnabled,
     "handoff.disabled": result.checks.handoffDisabled,
+    "handoff.enabled": result.checks.handoffEnabled,
     "pencil-live-check.generated": result.checks.pencilLiveCheckGenerated,
     "pencil-wireframes.generated": result.checks.pencilWireframesGenerated,
     "design-system-primitives.generated": result.checks.designSystemPrimitivesGenerated,
@@ -446,6 +451,7 @@ export async function checkSubskillCanRun(state, subskillName) {
     "design-system-contracts.generated": result.checks.designSystemContractsGenerated,
     "prototype-package.generated": result.checks.prototypePackageGenerated,
     "prototype-visual-qa.generated": result.checks.prototypeVisualQaGenerated,
+    "handoff-package.generated": result.checks.handoffPackageGenerated,
     "prototype-refinement-limit.valid": result.checks.prototypeRefinementLimitValid,
     "no-real-phase-behavior": result.checks.noRealPhaseBehavior
   };
@@ -713,6 +719,7 @@ export function formatSubskillRunCheck(result) {
     `design-system generation enabled: ${result.checks.designSystemGenerationEnabled ? "yes" : "no"}`,
     `prototype generation enabled: ${result.checks.prototypeGenerationEnabled ? "yes" : "no"}`,
     `handoff disabled: ${result.checks.handoffDisabled ? "yes" : "no"}`,
+    `handoff enabled: ${result.checks.handoffEnabled ? "yes" : "no"}`,
     `errors: ${result.errors.length}`,
     `warnings: ${result.warnings.length}`
   ];
@@ -1035,26 +1042,20 @@ function validateDisabledBehaviors(manifest, result) {
   }
 
   if (manifest.disabledBehaviors.canonicalGeneration !== false) {
-    addError(result, "manifest.disabledBehaviors.canonicalGeneration", "Stage 08 must keep canonical generation available for upstream repair");
+    addError(result, "manifest.disabledBehaviors.canonicalGeneration", "Stage 09 must keep canonical generation available for upstream repair");
   }
 
   if (manifest.disabledBehaviors.imageGeneration !== false) {
-    addError(result, "manifest.disabledBehaviors.imageGeneration", "Stage 08 must allow active-agent image generation instructions for upstream visual references");
+    addError(result, "manifest.disabledBehaviors.imageGeneration", "Stage 09 must allow active-agent image generation instructions for upstream visual references");
   }
 
   if (manifest.disabledBehaviors.visualReferenceGeneration !== false) {
-    addError(result, "manifest.disabledBehaviors.visualReferenceGeneration", "Stage 08 must keep selected visual reference records available");
+    addError(result, "manifest.disabledBehaviors.visualReferenceGeneration", "Stage 09 must keep selected visual reference records available");
   }
 
-  for (const key of STAGE_08_ENABLED_BEHAVIOR_KEYS) {
+  for (const key of STAGE_09_ENABLED_BEHAVIOR_KEYS) {
     if (manifest.disabledBehaviors[key] !== false) {
-      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 08 must enable this implemented behavior");
-    }
-  }
-
-  for (const key of STAGE_08_DISABLED_BEHAVIOR_KEYS) {
-    if (manifest.disabledBehaviors[key] !== true) {
-      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 08 must keep this behavior disabled");
+      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 09 must enable this implemented behavior");
     }
   }
 }
@@ -1192,10 +1193,6 @@ function validateGraph(graph, result) {
 
     if (REFERENCE_ONLY_KINDS.has(artifact.kind) && artifact.referenceOnly !== true) {
       addError(result, `${basePath}.referenceOnly`, "downstream visual/Pencil/DS/prototype/handoff artifacts must be reference-only");
-    }
-
-    if (artifact.kind === "handoff" && artifact.generated !== false) {
-      addError(result, `${basePath}.generated`, "Handoff artifacts must not be generated in Stage 08");
     }
 
     result.counts.dependencies += Array.isArray(artifact.upstreamDependencies) ? artifact.upstreamDependencies.length : 0;

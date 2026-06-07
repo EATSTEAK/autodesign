@@ -294,8 +294,8 @@ async function assertBaseStateReady(state) {
   if (state.manifest.disabledBehaviors.prototypeGeneration !== false) {
     throw new Error("manifest.disabledBehaviors.prototypeGeneration must be false for Stage 08 prototype records.");
   }
-  if (state.manifest.disabledBehaviors.handoff !== true) {
-    throw new Error("manifest.disabledBehaviors.handoff must remain true; Stage 08 does not implement frontend handoff.");
+  if (typeof state.manifest.disabledBehaviors.handoff !== "boolean") {
+    throw new Error("manifest.disabledBehaviors.handoff must be explicitly boolean.");
   }
 }
 

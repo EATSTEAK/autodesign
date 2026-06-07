@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "08-pencil-prototype-and-design-system",
+  "stage": "09-handoff-and-hooks",
   "publicSkills": [
     "autodesign-start"
   ],
@@ -191,6 +191,32 @@
       "requiresApproval": [
         "--approve-prototype-qa"
       ]
+    },
+    {
+      "name": "generate-handoff-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace <workspace> --action handoff --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "generate-handoff-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace <workspace> --action handoff --apply --approve-handoff-generation --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-handoff-generation"
+      ]
+    },
+    {
+      "name": "generate-reconcile-report-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace <workspace> --action reconcile --changed <artifact-id> --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "generate-reconcile-report-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace <workspace> --action reconcile --changed <artifact-id> --apply --approve-reconcile-report --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-reconcile-report"
+      ]
     }
   ],
   "payload": {
@@ -269,13 +295,13 @@
       },
       {
         "path": "subskills/autodesign-handoff/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private handoff subskill contract for handoff.package."
+        "status": "implemented",
+        "purpose": "Private handoff subskill for Stage 09 JSON/Markdown frontend handoff documentation."
       },
       {
         "path": "subskills/autodesign-reconcile/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private reconcile subskill contract for log.reconcile-report."
+        "status": "implemented",
+        "purpose": "Private reconcile subskill for Stage 09 dirty propagation reports and reconcile alerts."
       },
       {
         "path": "subskills/autodesign-eval/SKILL.md",
@@ -290,7 +316,7 @@
       {
         "path": "subskills/autodesign-phase-placeholder/SKILL.md",
         "status": "legacy-placeholder",
-        "purpose": "Stage 04 placeholder retained for compatibility; concrete Stage 08 contracts are listed above."
+        "purpose": "Stage 04 placeholder retained for compatibility; concrete Stage 09 contracts are listed above."
       },
       {
         "path": "subskills/autodesign-qa/SKILL.md",
@@ -317,12 +343,12 @@
       {
         "path": "scripts/lib/autodesign-state.mjs",
         "status": "implemented",
-        "purpose": "Shared deterministic validation, graph traversal, dirty computation, and Stage 08 gate helpers."
+        "purpose": "Shared deterministic validation, graph traversal, dirty computation, and Stage 09 gate helpers."
       },
       {
         "path": "scripts/validate-state.mjs",
         "status": "implemented",
-        "purpose": "Validate manifest and artifact graph JSON plus Stage 08 semantic constraints."
+        "purpose": "Validate manifest and artifact graph JSON plus Stage 09 semantic constraints."
       },
       {
         "path": "scripts/check-dependencies.mjs",
@@ -348,20 +374,30 @@
         "path": "scripts/generate-pencil-prototype.mjs",
         "status": "implemented",
         "purpose": "Stage 08 Pencil live-check, wireframe, primitive, DS, prototype, QA, and refinement-gate workflow."
+      },
+      {
+        "path": "scripts/generate-handoff.mjs",
+        "status": "implemented",
+        "purpose": "Stage 09 frontend handoff documentation and reconcile report workflow."
       }
     ],
     "hooks": [
       {
-        "path": "hooks/autodesign-bootstrap-noop.mjs",
-        "status": "no-op-placeholder",
-        "purpose": "Bundled no-op hook adapter."
+        "path": "hooks/autodesign-status-advisory.mjs",
+        "status": "implemented",
+        "purpose": "Bundled read-only hook adapter for status injection, schema validation, and turn summaries."
+      },
+      {
+        "path": "hooks/autodesign-boundary-advisory.mjs",
+        "status": "implemented",
+        "purpose": "Bundled read-only hook adapter for overwrite warnings and reconcile alerts."
       }
     ],
     "workspaceTemplate": [
       "workspace-template/AGENTS.md",
       "workspace-template/.codex/config.toml",
-      "workspace-template/.codex/hooks/autodesign-bootstrap-noop.mjs",
-      "workspace-template/.codex/hooks/autodesign-boundary-noop.mjs",
+      "workspace-template/.codex/hooks/autodesign-status-advisory.mjs",
+      "workspace-template/.codex/hooks/autodesign-boundary-advisory.mjs",
       "workspace-template/autodesign/README.md",
       "workspace-template/autodesign/manifest.json",
       "workspace-template/autodesign/artifact-graph.json",
@@ -458,6 +494,20 @@
       "--at",
       "--refinement-attempt 0..2",
       "prototype.package.generated"
+    ],
+    "handoffGenerationRequires": [
+      "--approve-handoff-generation",
+      "--actor",
+      "--at",
+      "prototype.visual-qa.approved",
+      "prototype.refinement.valid"
+    ],
+    "reconcileReportRequires": [
+      "--changed",
+      "--approve-reconcile-report",
+      "--actor",
+      "--at",
+      "handoff.package.generated"
     ]
   },
   "disabledBehaviors": {
@@ -467,15 +517,17 @@
     "visualReferenceGeneration": false,
     "designSystemGeneration": false,
     "prototypeGeneration": false,
-    "handoff": true,
+    "handoff": false,
     "realSubskillPhaseBehavior": false
   },
   "notes": [
     "autodesign-start is the only public skill at install time.",
-    "Stage 08 keeps canonical and visual reference repair available, then implements Pencil, DS, prototype, QA, and refinement record workflows after selected visual references are approved.",
+    "Stage 09 keeps canonical and visual reference repair available, then implements Pencil, DS, prototype, QA, handoff documentation, and reconcile report workflows after selected visual references are approved.",
     "Pencil-derived records require a completed active Pencil MCP handoff: get_editor_state, batch_design, export_nodes, an Autodesign-owned virtual .pen filePath, created/exported node bindings, and real canvas export paths.",
     "Externally supplied JSON is never the sole trust source; evidence must cross-check the virtual Pencil filePath plus actual export file bytes.",
     "Primitive inventory, DS tokens/contracts, prototype metadata, semantic QA, and max-two-refinement records are deterministic metadata artifacts.",
-    "No frontend handoff, executable prototype code, fake Pencil canvas output, reconcile report, eval report, or skill optimization is implemented."
+    "Stage 09 handoff writes JSON and Markdown documentation only under autodesign/outputs/handoff and does not generate frontend source files or executable prototype code.",
+    "Stage 09 hooks are observational/advisory only and do not generate artifacts, call image generation, call Pencil MCP, mutate design files, or produce frontend code.",
+    "Eval report and skill optimization remain later-stage outputs."
   ]
 }

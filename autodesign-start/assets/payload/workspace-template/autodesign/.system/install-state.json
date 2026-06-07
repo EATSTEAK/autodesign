@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "stage": "08-pencil-prototype-and-design-system",
+  "stage": "09-handoff-and-hooks",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
-  "runtime": "bootstrap-state-subskill-contracts-canonical-visual-reference-pencil-ds-prototype-qa-and-refinement-gates",
+  "runtime": "bootstrap-state-subskill-contracts-canonical-visual-reference-pencil-ds-prototype-qa-refinement-handoff-reconcile-and-advisory-hooks",
   "materializedBy": "autodesign-start/assets/payload/scripts/bootstrap.mjs",
   "stateScripts": {
     "validateState": "autodesign-start/assets/payload/scripts/validate-state.mjs",
@@ -13,7 +13,8 @@
     "dirtyArtifacts": "autodesign-start/assets/payload/scripts/dirty-artifacts.mjs",
     "generateCanonical": "autodesign-start/assets/payload/scripts/generate-canonical.mjs",
     "generateVisualReferences": "autodesign-start/assets/payload/scripts/generate-visual-references.mjs",
-    "generatePencilPrototype": "autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs"
+    "generatePencilPrototype": "autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs",
+    "generateHandoff": "autodesign-start/assets/payload/scripts/generate-handoff.mjs"
   },
   "approvalGates": {
     "applyRequires": [
@@ -50,8 +51,7 @@
       "--actor",
       "--at",
       "pencil-mcp.get_editor_state",
-      "active-pencil-agent-opened-autodesign-pen",
-      "pen-file-sha256-and-bytes-match"
+      "autodesign-owned-virtual-pen-filePath"
     ],
     "pencilWireframeRequires": [
       "--approve-pencil-wireframes",
@@ -61,6 +61,9 @@
       "pencil-mcp.batch_design",
       "pencil-mcp.export_nodes",
       "--pencil-evidence-path",
+      "autodesign-owned-virtual-pen-filePath",
+      "batch-design-created-frame-ids",
+      "export-nodes-node-bindings",
       "real-canvas-export-paths"
     ],
     "designSystemPrimitivesRequires": [
@@ -80,6 +83,10 @@
       "pencil-mcp.batch_design",
       "pencil-mcp.export_nodes",
       "--pencil-evidence-path",
+      "design-system.tokens.generated",
+      "autodesign-owned-virtual-pen-filePath",
+      "batch-design-created-frame-ids",
+      "export-nodes-node-bindings",
       "real-canvas-export-paths"
     ],
     "prototypeQaRequires": [
@@ -87,13 +94,24 @@
       "--actor",
       "--at",
       "--refinement-attempt 0..2"
+    ],
+    "handoffGenerationRequires": [
+      "--approve-handoff-generation",
+      "--actor",
+      "--at"
+    ],
+    "reconcileReportRequires": [
+      "--changed",
+      "--approve-reconcile-report",
+      "--actor",
+      "--at"
     ]
   },
   "materializedFiles": [
     "AGENTS.md",
     ".codex/config.toml",
-    ".codex/hooks/autodesign-bootstrap-noop.mjs",
-    ".codex/hooks/autodesign-boundary-noop.mjs",
+    ".codex/hooks/autodesign-status-advisory.mjs",
+    ".codex/hooks/autodesign-boundary-advisory.mjs",
     "autodesign/README.md",
     "autodesign/manifest.json",
     "autodesign/artifact-graph.json",
@@ -109,7 +127,7 @@
     "visualReferenceGeneration": false,
     "designSystemGeneration": false,
     "prototypeGeneration": false,
-    "handoff": true,
+    "handoff": false,
     "realSubskillPhaseBehavior": false
   }
 }

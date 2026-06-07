@@ -1,41 +1,57 @@
 ---
 name: autodesign-reconcile
-description: Private Stage 06 contract for the Autodesign reconcile subskill. Contract-only; checks prerequisites and does not generate reports.
+description: Private Stage 09 reconcile subskill. Generates advisory dirty-propagation reports from artifact graph preserve/may-change policies after handoff docs exist.
 ---
 
 # Autodesign Reconcile Contract
 
-This private payload subskill is not public. Enter it only through `autodesign-start` or a later orchestrator after running the deterministic readiness check.
+This private payload subskill is not public. Enter it only through `autodesign-start` after running the deterministic readiness check.
 
 ## Required Upstream Artifacts
 
-- `inputs.project-material` at `autodesign/inputs`
-- `canonical.project-brief` at `autodesign/outputs/canonical/project-brief.json`
-- `canonical.requirements` at `autodesign/outputs/canonical/requirements.json`
-- `canonical.brand-direction` at `autodesign/outputs/canonical/brand-direction.json`
-- `canonical.screen-model` at `autodesign/outputs/canonical/screen-model.json`
-- `canonical.interaction-model` at `autodesign/outputs/canonical/interaction-model.json`
-- `visual.reference-set` at `autodesign/outputs/visual-references`
-- `pencil.wireframe-set` at `autodesign/outputs/pencil/wireframes`
-- `design-system.tokens` at `autodesign/outputs/design-system/tokens.json`
-- `prototype.package` at `autodesign/outputs/prototype`
-- `handoff.package` at `autodesign/outputs/handoff`
+- `inputs.project-material`
+- `canonical.project-brief`
+- `canonical.requirements`
+- `canonical.brand-direction`
+- `canonical.screen-model`
+- `canonical.interaction-model`
+- `visual.reference-set`
+- `pencil.wireframe-set`
+- `design-system.tokens`
+- `prototype.package`
+- `handoff.package`
 
 ## Output Artifacts
 
 - `log.reconcile-report` at `autodesign/logs/reconcile-report.json`
 
-Stage 06 declares this output only. Do not create or update it.
-
 ## Hard Gates
 
 - `scripts/can-run-subskill.mjs --workspace <workspace> --subskill reconcile` must pass.
-- `manifest.disabledBehaviors.realSubskillPhaseBehavior` must be `true`.
-- The artifact graph must contain every required upstream and output artifact id.
+- `handoff.package` must be generated and present.
+- At least one changed upstream artifact id must be supplied with `--changed`.
+- Apply requires `--approve-reconcile-report`, `--actor`, and `--at`.
+
+## Required Command
+
+Plan first:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace <workspace> --action reconcile --changed <artifact-id> --plan
+```
+
+Apply only after explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace <workspace> --action reconcile --changed <artifact-id> --apply --approve-reconcile-report --actor <actor> --at <timestamp>
+```
 
 ## Fail Fast
 
 - Stop if state validation fails.
 - Stop if graph dependencies are missing or cyclic.
-- Stop if any required upstream artifact path is missing.
-- If all gates pass, report contract-only status and stop before reconcile analysis or report generation.
+- Stop if any required upstream artifact path is absent.
+- Stop if `handoff.package` is not generated.
+- Stop if `--changed` is missing or references an unknown artifact id.
+- Write only `autodesign/logs/reconcile-report.json` plus manifest and artifact graph state updates.
+- Do not mutate upstream artifacts, design files, Pencil state, images, or frontend code.

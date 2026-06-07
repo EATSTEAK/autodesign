@@ -211,6 +211,7 @@
               "design-system-generation.enabled",
               "prototype-generation.enabled",
               "handoff.disabled",
+              "handoff.enabled",
               "pencil-live-check.generated",
               "pencil-wireframes.generated",
               "design-system-primitives.generated",
@@ -218,6 +219,7 @@
               "design-system-contracts.generated",
               "prototype-package.generated",
               "prototype-visual-qa.generated",
+              "handoff-package.generated",
               "prototype-refinement-limit.valid",
               "no-real-phase-behavior"
             ]

@@ -1,6 +1,6 @@
 ---
 name: autodesign-start
-description: Start Autodesign setup from the eatsteak/autodesign skill package. Use when the user asks to initialize, start, install-check, bootstrap, validate state, inspect the artifact graph, check subskill readiness, record gates, compute dirty artifacts, generate canonical artifacts, run visual reference gates, or run Stage 08 Pencil/DS/prototype/QA metadata records. Do not generate frontend handoff.
+description: Start Autodesign setup from the eatsteak/autodesign skill package. Use when the user asks to initialize, start, install-check, bootstrap, validate state, inspect the artifact graph, check subskill readiness, record gates, compute dirty artifacts, generate canonical artifacts, run visual reference gates, run Pencil/DS/prototype/QA metadata records, generate frontend handoff docs, or generate reconcile reports.
 ---
 
 # Autodesign Start
@@ -9,9 +9,9 @@ This is the only public skill exposed by the `eatsteak/autodesign` package at in
 
 ## Current Stage
 
-Stage 08 provides a one-shot bootstrap runtime that materializes the bundled Autodesign workspace template into a target project, deterministic manifest and artifact graph state-management scripts, private subskill readiness checks, canonical artifact generation from real project input files, visual reference prompt/candidate/selection record gates, and Stage 08 Pencil/DS/prototype/QA metadata workflows.
+Stage 09 provides a one-shot bootstrap runtime that materializes the bundled Autodesign workspace template into a target project, deterministic manifest and artifact graph state-management scripts, private subskill readiness checks, canonical artifact generation from real project input files, visual reference prompt/candidate/selection record gates, Stage 08 Pencil/DS/prototype/QA metadata workflows, Stage 09 frontend handoff documentation, reconcile reports, and read-only advisory hooks.
 
-Allowed Stage 08 generation is limited to canonical planning artifacts, visual reference records, Pencil live-check records, wireframe/prototype metadata, canvas export path records, primitive inventory, DS tokens/contracts, semantic visual QA, and max-two-refinement records. Pencil canvas edits and exports are performed by the active agent through Pencil; scripts only record real evidence and fail fast when live-check evidence, active `batch_design`/`export_nodes` evidence, an Autodesign-owned virtual `.pen` filePath, created/exported node bindings, or real export files are missing. Do not generate frontend handoff files.
+Allowed Stage 09 generation is limited to canonical planning artifacts, visual reference records, Pencil live-check records, wireframe/prototype metadata, canvas export path records, primitive inventory, DS tokens/contracts, semantic visual QA, max-two-refinement records, JSON/Markdown frontend handoff documentation, and advisory reconcile reports. Pencil canvas edits and exports are performed by the active agent through Pencil; scripts only record real evidence and fail fast when live-check evidence, active `batch_design`/`export_nodes` evidence, an Autodesign-owned virtual `.pen` filePath, created/exported node bindings, or real export files are missing. Handoff must not create frontend source files or executable prototype code.
 
 ## Bundled Payload
 
@@ -23,11 +23,12 @@ Runtime assets live under `assets/payload/`:
 - `scripts/generate-canonical.mjs` for deterministic canonical artifact generation and manifest/graph updates.
 - `scripts/generate-visual-references.mjs` for visual reference prompt, candidate, and selected-reference records.
 - `scripts/generate-pencil-prototype.mjs` for Stage 08 Pencil live-check, wireframe, primitive, DS, prototype, QA, and refinement-gate records.
+- `scripts/generate-handoff.mjs` for Stage 09 frontend handoff documentation and reconcile reports.
 - `scripts/validate-state.mjs`, `scripts/check-dependencies.mjs`, `scripts/can-run-subskill.mjs`, `scripts/record-gate.mjs`, and `scripts/dirty-artifacts.mjs` for state and contract readiness management.
-- `hooks/` for no-op lifecycle hook adapters.
+- `hooks/` for read-only advisory hook adapters.
 - `workspace-template/` for files materialized by the bootstrap runtime.
 
-Read `assets/payload/payload-manifest.json` for the concrete Stage 08 payload inventory.
+Read `assets/payload/payload-manifest.json` for the concrete Stage 09 payload inventory.
 
 ## Bootstrap Command
 
@@ -150,9 +151,36 @@ Apply only with the action-specific approval flag, `--actor`, and `--at`. The QA
 
 Handoff contract when code cannot call MCP directly: Stage 08 is NOT READY until a live Pencil agent has targeted the Autodesign-owned virtual `.pen` filePath, created wireframe/prototype frames with `batch_design`, exported screenshots with `export_nodes`, and written evidence JSON containing `evidenceType`, `mcpToolCalls`, `targetPenPath`, `liveCheckEvidenceHash`, `batchDesign.createdNodeIds`, `exportNodes.nodeIds`, per-screen `frames[]`, and `exports[]` with matching path/bytes/sha256/node bindings.
 
+## Stage 09 Handoff And Reconcile
+
+Run `generate-handoff.mjs --plan` before any apply. Handoff requires approved selected visual references, Pencil live-check and wireframe records, DS primitives/tokens/contracts, prototype package, prototype visual QA, and a valid refinement gate.
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /absolute/path/to/project --action handoff --plan
+node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /absolute/path/to/project --action reconcile --changed canonical.requirements --plan
+```
+
+Apply only with the action-specific approval flag, `--actor`, and `--at`:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /absolute/path/to/project --action handoff --apply --approve-handoff-generation --actor <actor> --at <timestamp>
+node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /absolute/path/to/project --action reconcile --changed canonical.requirements --apply --approve-reconcile-report --actor <actor> --at <timestamp>
+```
+
+Handoff writes only `autodesign/outputs/handoff/handoff-package.json` and `autodesign/outputs/handoff/README.md`. Reconcile writes only `autodesign/logs/reconcile-report.json`. Neither action may mutate upstream artifacts, call image generation, call Pencil MCP, or create frontend code.
+
+## Advisory Hooks
+
+The materialized hooks are read-only adapters:
+
+- `autodesign-status-advisory.mjs` emits status injection, lightweight state validation, and turn summaries.
+- `autodesign-boundary-advisory.mjs` emits overwrite warnings and reconcile alerts.
+
+Hooks print JSON only in debug/explicit JSON mode and must not generate artifacts or mutate files.
+
 ## Materialized Files
 
-The bootstrap runtime copies `assets/payload/workspace-template/` into the target project. Stage 08 materializes:
+The bootstrap runtime copies `assets/payload/workspace-template/` into the target project. Stage 09 materializes:
 
 - `AGENTS.md`
 - `.codex/config.toml`
@@ -174,3 +202,4 @@ The bootstrap runtime copies `assets/payload/workspace-template/` into the targe
 7. For canonical generation requests, run `generate-canonical.mjs --plan` first and apply only with `--approve-canonical-generation --actor <actor> --at <timestamp>`.
 8. For visual reference requests, run `generate-visual-references.mjs --plan` first. Apply prompt, candidate, or selection records only with that action's explicit approval flag.
 9. For Pencil, DS, prototype, or QA requests, run `generate-pencil-prototype.mjs --plan` first. Apply only with the action-specific approval flag, `--actor`, and `--at`.
+10. For handoff or reconcile requests, run `generate-handoff.mjs --plan` first. Apply only with the action-specific approval flag, `--actor`, and `--at`.

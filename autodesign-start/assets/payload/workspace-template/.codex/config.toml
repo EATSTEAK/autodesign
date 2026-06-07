@@ -1,13 +1,25 @@
-# Autodesign Stage 04 project-local marker.
-# The hook files listed here are no-op placeholders.
+# Autodesign Stage 09 project-local marker.
+# The hook files listed here are observational/advisory only.
 
 [autodesign]
-stage = "04-manifest-and-artifact-graph"
-runtime = "bootstrap-and-state-only"
+stage = "09-handoff-and-hooks"
+runtime = "bootstrap-state-canonical-visual-pencil-ds-prototype-qa-handoff-reconcile"
 install_state = "autodesign/.system/install-state.json"
 manifest = "autodesign/manifest.json"
 artifact_graph = "autodesign/artifact-graph.json"
 
 [autodesign.hooks]
-bootstrap_noop = ".codex/hooks/autodesign-bootstrap-noop.mjs"
-boundary_noop = ".codex/hooks/autodesign-boundary-noop.mjs"
+status_advisory = ".codex/hooks/autodesign-status-advisory.mjs"
+boundary_advisory = ".codex/hooks/autodesign-boundary-advisory.mjs"
+
+[autodesign.hook_behavior]
+status_injection = true
+schema_validation = true
+overwrite_warnings = true
+turn_summaries = true
+reconcile_alerts = true
+generates_artifacts = false
+generates_frontend_code = false
+calls_image_generation = false
+calls_pencil_mcp = false
+mutates_design_files = false

@@ -1,6 +1,6 @@
 # Payload Scripts
 
-Stage 08 includes deterministic bootstrap, state-management, subskill readiness, canonical generation, visual reference gate, Pencil, design-system, prototype, QA, and refinement gate scripts.
+Stage 09 includes deterministic bootstrap, state-management, subskill readiness, canonical generation, visual reference gate, Pencil, design-system, prototype, QA, refinement gate, handoff documentation, reconcile report, and advisory hook scripts.
 
 ## Bootstrap
 
@@ -203,3 +203,49 @@ Minimum frame/export evidence shape for wireframes or prototype:
 ```
 
 Use `evidenceType: "pencil-mcp-prototype-generation"` for prototype evidence.
+
+## Stage 09 Handoff And Reconcile
+
+Plan frontend handoff documentation without writing:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /absolute/path/to/project --action handoff --plan
+```
+
+Apply handoff documentation only with explicit approval and deterministic record metadata:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /absolute/path/to/project --action handoff --apply --approve-handoff-generation --actor <actor> --at <timestamp>
+```
+
+The handoff action reads canonical, visual-reference, Pencil, design-system, prototype, QA, and refinement artifacts. It writes only:
+
+- `autodesign/outputs/handoff/handoff-package.json`
+- `autodesign/outputs/handoff/README.md`
+
+It rejects any non-state write outside `autodesign/outputs/handoff/` and any non-JSON/non-Markdown handoff output.
+
+Plan a reconcile report from changed upstream artifacts:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /absolute/path/to/project --action reconcile --changed canonical.requirements --plan
+```
+
+Apply only with explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-handoff.mjs --workspace /absolute/path/to/project --action reconcile --changed canonical.requirements --apply --approve-reconcile-report --actor <actor> --at <timestamp>
+```
+
+The reconcile action writes only `autodesign/logs/reconcile-report.json`. It uses artifact graph dirty propagation plus preserve/may-change policies and does not mutate upstream artifacts, design files, Pencil state, images, or frontend code.
+
+## Advisory Hooks
+
+The Stage 09 hook adapters are read-only:
+
+```bash
+node .codex/hooks/autodesign-status-advisory.mjs --workspace /absolute/path/to/project --json
+node .codex/hooks/autodesign-boundary-advisory.mjs --workspace /absolute/path/to/project --changed canonical.requirements --json
+```
+
+Hooks emit status injection, lightweight schema validation, overwrite warnings, turn summaries, and reconcile alerts. They do not generate artifacts, mutate files, call image generation, call Pencil MCP, or create frontend code.

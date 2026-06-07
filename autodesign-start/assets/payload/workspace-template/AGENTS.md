@@ -1,28 +1,28 @@
 # Autodesign Workspace
 
-This project has been materialized by the Autodesign Stage 08 bootstrap, state, subskill contract, canonical pipeline, visual reference gate, Pencil, design-system, prototype, QA, and refinement runtime.
+This project has been materialized by the Autodesign Stage 09 bootstrap, state, subskill contract, canonical pipeline, visual reference gate, Pencil, design-system, prototype, QA, refinement, handoff, reconcile, and advisory hook runtime.
 
-Allowed Stage 08 behavior:
+Allowed Stage 09 behavior:
 
 - Inspect `autodesign/.system/install-state.json`.
 - Inspect and validate `autodesign/manifest.json`.
 - Inspect and validate `autodesign/artifact-graph.json`.
-- Run deterministic Stage 08 state scripts from the installed payload.
+- Run deterministic Stage 09 state scripts from the installed payload.
 - Run `can-run-subskill.mjs` to check private contract readiness.
 - Run `generate-canonical.mjs` only with its plan/apply approval gates.
 - Run `generate-visual-references.mjs` only with its prompt, candidate, and selection approval gates.
 - Run `generate-pencil-prototype.mjs --action live-check` only after the active Pencil MCP agent has produced `get_editor_state` evidence for an Autodesign-owned virtual `.pen` filePath under `autodesign/outputs/pencil/`.
 - Run `generate-pencil-prototype.mjs --action wireframes` only after selected references, Pencil live-check approval, an Autodesign-owned `.pen` file under `autodesign/outputs/pencil/`, active `batch_design`/`export_nodes` evidence, and real canvas exports exist.
 - Run `generate-pencil-prototype.mjs --action primitives`, `ds`, `prototype`, or `qa` only with the action-specific approval flag, `--actor`, and `--at`.
+- Run `generate-handoff.mjs --action handoff` only after Stage 08 artifacts and prototype QA/refinement gates exist; apply requires `--approve-handoff-generation`, `--actor`, and `--at`.
+- Run `generate-handoff.mjs --action reconcile` only after handoff docs exist; apply requires `--changed`, `--approve-reconcile-report`, `--actor`, and `--at`.
 - Inspect `.codex/config.toml` and `.codex/hooks/*.mjs`.
 - Use the bootstrap script to re-plan or re-apply template files with explicit approval gates.
 
-Not implemented in Stage 08:
+Not implemented in Stage 09:
 
-- Frontend handoff.
 - Executable prototype implementation files.
 - Fake Pencil canvas output.
-- Reconcile report generation.
 - Evaluation report generation.
 - Skill optimization.
 
@@ -32,4 +32,6 @@ Canonical generation is limited to source-of-truth planning artifacts. UX rules,
 
 Visual reference scripts persist prompt text, active-agent image-generation instructions, generated output path fields, and review metadata. They must not hardcode an image model, create image files, fake image generation, or auto-select references.
 
-Stage 08 scripts require approved selected visual references before Pencil, DS, prototype, or QA records. Pencil-derived records require live Pencil MCP tool evidence and real files; if Pencil is unavailable, Stage 08 is NOT READY and scripts fail fast instead of fabricating output.
+Stage 09 scripts require approved selected visual references before Pencil, DS, prototype, QA, handoff, or reconcile records. Pencil-derived records require live Pencil MCP tool evidence and real files; if Pencil is unavailable, Stage 08-derived prerequisites remain NOT READY and scripts fail fast instead of fabricating output.
+
+Handoff generation writes JSON and Markdown documentation only under `autodesign/outputs/handoff`. Reconcile generation writes an advisory JSON report only under `autodesign/logs/reconcile-report.json`. Hooks are observational/advisory only and must not generate artifacts, call image generation, call Pencil MCP, mutate design files, or create frontend code.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "08-pencil-prototype-and-design-system",
+  "stage": "09-handoff-and-hooks",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
   "workspace": {
@@ -528,9 +528,9 @@
     {
       "name": "handoff",
       "path": "subskills/autodesign-handoff/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "canonical.project-brief",
         "canonical.requirements",
@@ -542,40 +542,58 @@
         "canonical.screen-state-matrix",
         "canonical.coverage-matrix",
         "canonical.visual-anchor-proposals",
+        "log.decision-log",
         "visual.reference-set",
+        "pencil.live-check",
         "pencil.wireframe-set",
+        "pencil.canvas-exports",
+        "design-system.primitives",
         "design-system.tokens",
-        "prototype.package"
+        "design-system.contracts",
+        "prototype.package",
+        "prototype.canvas-exports",
+        "prototype.visual-qa-report",
+        "prototype.refinement-log"
       ],
       "outputArtifacts": [
         "handoff.package"
       ],
-      "outputFiles": [],
+      "outputFiles": [
+        "autodesign/outputs/handoff/handoff-package.json",
+        "autodesign/outputs/handoff/README.md"
+      ],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "selected-visual-references.approved",
+        "handoff.enabled",
+        "pencil-live-check.generated",
+        "pencil-wireframes.generated",
+        "design-system-primitives.generated",
+        "design-system-tokens.generated",
+        "design-system-contracts.generated",
+        "prototype-package.generated",
+        "prototype-visual-qa.generated",
+        "prototype-refinement-limit.valid"
       ],
-      "disabledBehaviors": [
-        "handoff",
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
+        "Run scripts/generate-handoff.mjs --action handoff in plan mode before apply.",
+        "Write only JSON and Markdown documentation under autodesign/outputs/handoff.",
+        "Do not generate frontend source files, executable prototype code, images, or Pencil changes."
       ]
     },
     {
       "name": "reconcile",
       "path": "subskills/autodesign-reconcile/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "inputs.project-material",
         "canonical.project-brief",
@@ -604,17 +622,17 @@
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "handoff-package.generated"
       ],
-      "disabledBehaviors": [
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
         "Stop if state validation fails.",
         "Stop if graph dependencies are missing or cyclic.",
         "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
+        "Run scripts/generate-handoff.mjs --action reconcile in plan mode before apply.",
+        "Require at least one --changed artifact id for dirty propagation context.",
+        "Write only autodesign/logs/reconcile-report.json.",
+        "Do not mutate upstream artifacts, design files, Pencil state, or frontend code."
       ]
     },
     {
@@ -755,7 +773,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Canonical generation remains available for Stage 08 upstream repair.",
+      "note": "Canonical generation remains available for Stage 09 upstream repair.",
       "history": []
     },
     {
@@ -1022,18 +1040,42 @@
     },
     {
       "id": "handoff.export",
-      "status": "not-implemented",
+      "status": "pending",
       "required": true,
-      "implemented": false,
+      "implemented": true,
       "scope": [
-        "handoff"
+        "handoff.package"
       ],
       "requires": [
-        "later-stage"
+        "prototype.visual-qa.approved",
+        "prototype.refinement.valid",
+        "--approve-handoff-generation",
+        "--actor",
+        "--at"
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Frontend handoff remains outside Stage 08.",
+      "note": "Frontend handoff writes JSON and Markdown documentation only; no frontend code or executable prototype files are generated.",
+      "history": []
+    },
+    {
+      "id": "reconcile.report",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "log.reconcile-report"
+      ],
+      "requires": [
+        "handoff.package.generated",
+        "--changed",
+        "--approve-reconcile-report",
+        "--actor",
+        "--at"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Reconcile report is advisory and uses dirty propagation plus preserve/may-change policies without mutating upstream artifacts.",
       "history": []
     }
   ],
@@ -1045,15 +1087,16 @@
     "visualReferenceGeneration": false,
     "designSystemGeneration": false,
     "prototypeGeneration": false,
-    "handoff": true,
+    "handoff": false,
     "realSubskillPhaseBehavior": false
   },
   "notes": [
-    "Stage 08 requires approved selected visual references before Pencil, design-system, prototype, or QA records can run.",
+    "Stage 09 requires approved selected visual references before Pencil, design-system, prototype, QA, handoff, or reconcile records can run.",
     "Pencil actions require active Pencil MCP get_editor_state, batch_design, and export_nodes evidence, plus an Autodesign-owned virtual .pen filePath under autodesign/outputs/pencil/.",
     "Scripts persist metadata, canvas export path records, primitive inventory, DS tokens/contracts, semantic visual QA, and the max-two-refinement gate only after live Pencil evidence cross-checks the virtual Pencil filePath and actual export file bytes.",
     "Scripts never create or fake Pencil canvas output and fail fast when live Pencil evidence, created/exported node bindings, or real export files are missing.",
-    "Frontend handoff remains disabled and not implemented in Stage 08."
+    "Stage 09 handoff writes JSON and Markdown documentation only under autodesign/outputs/handoff and does not generate frontend source files or executable prototype code.",
+    "Stage 09 reconcile reports are advisory JSON logs and do not mutate upstream artifacts."
   ],
   "generationRecords": []
 }
