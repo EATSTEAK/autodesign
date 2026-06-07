@@ -1,6 +1,6 @@
 ---
 name: autodesign-start
-description: Start Autodesign setup from the eatsteak/autodesign skill package. Use when the user asks to initialize, start, install-check, bootstrap, validate state, inspect the artifact graph, check subskill readiness, record gates, compute dirty artifacts, generate canonical artifacts, or run Stage 07 visual reference gates. Do not run Pencil, design-system, prototype, or handoff generation.
+description: Start Autodesign setup from the eatsteak/autodesign skill package. Use when the user asks to initialize, start, install-check, bootstrap, validate state, inspect the artifact graph, check subskill readiness, record gates, compute dirty artifacts, generate canonical artifacts, run visual reference gates, or run Stage 08 Pencil/DS/prototype/QA metadata records. Do not generate frontend handoff.
 ---
 
 # Autodesign Start
@@ -9,9 +9,9 @@ This is the only public skill exposed by the `eatsteak/autodesign` package at in
 
 ## Current Stage
 
-Stage 07 provides a one-shot bootstrap runtime that materializes the bundled Autodesign workspace template into a target project, deterministic manifest and artifact graph state-management scripts, private subskill readiness checks, canonical artifact generation from real project input files, and visual reference prompt/candidate/selection record gates.
+Stage 08 provides a one-shot bootstrap runtime that materializes the bundled Autodesign workspace template into a target project, deterministic manifest and artifact graph state-management scripts, private subskill readiness checks, canonical artifact generation from real project input files, visual reference prompt/candidate/selection record gates, and Stage 08 Pencil/DS/prototype/QA metadata workflows.
 
-Allowed file generation is limited to canonical planning artifacts and Stage 07 visual reference records. Visual reference records may instruct the active agent to generate real images and may persist real generated output paths, but the script must not create image files, name a specific image model, or fake image generation. Do not create Pencil files, run design-system logic, generate prototypes, hand off to another phase, generate reports, optimize skills, or execute later downstream phase behavior from this skill.
+Allowed Stage 08 generation is limited to canonical planning artifacts, visual reference records, Pencil live-check records, wireframe/prototype metadata, canvas export path records, primitive inventory, DS tokens/contracts, semantic visual QA, and max-two-refinement records. Pencil canvas edits and exports are performed by the active agent through Pencil; scripts only record real evidence and fail fast when live-check evidence, active `batch_design`/`export_nodes` evidence, an Autodesign-owned virtual `.pen` filePath, created/exported node bindings, or real export files are missing. Do not generate frontend handoff files.
 
 ## Bundled Payload
 
@@ -21,12 +21,13 @@ Runtime assets live under `assets/payload/`:
 - `schemas/` for manifest and artifact graph JSON schema files.
 - `scripts/bootstrap.mjs` for deterministic plan/apply workspace materialization.
 - `scripts/generate-canonical.mjs` for deterministic canonical artifact generation and manifest/graph updates.
-- `scripts/generate-visual-references.mjs` for Stage 07 visual reference prompt, candidate, and selected-reference records.
+- `scripts/generate-visual-references.mjs` for visual reference prompt, candidate, and selected-reference records.
+- `scripts/generate-pencil-prototype.mjs` for Stage 08 Pencil live-check, wireframe, primitive, DS, prototype, QA, and refinement-gate records.
 - `scripts/validate-state.mjs`, `scripts/check-dependencies.mjs`, `scripts/can-run-subskill.mjs`, `scripts/record-gate.mjs`, and `scripts/dirty-artifacts.mjs` for state and contract readiness management.
 - `hooks/` for no-op lifecycle hook adapters.
 - `workspace-template/` for files materialized by the bootstrap runtime.
 
-Read `assets/payload/payload-manifest.json` for the concrete Stage 07 payload inventory.
+Read `assets/payload/payload-manifest.json` for the concrete Stage 08 payload inventory.
 
 ## Bootstrap Command
 
@@ -132,9 +133,26 @@ node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --wo
 
 The visual reference script never auto-selects references and never creates image files.
 
+## Stage 08 Pencil, DS, Prototype, And QA
+
+Run `generate-pencil-prototype.mjs --plan` before any apply. All actions require approved selected visual references. Pencil-derived actions require a live Pencil MCP handoff: `get_editor_state`, `batch_design`, `export_nodes`, target `autodesign/outputs/pencil/*.pen`, frame evidence for canonical screens, export node bindings, and real canvas export paths.
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action live-check --pencil-live-check-source-path <path> --plan
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action wireframes --pencil-evidence-path <path> --canvas-export-path <path> --plan
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action primitives --plan
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action ds --plan
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action prototype --pencil-evidence-path <path> --canvas-export-path <path> --plan
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action qa --refinement-attempt 0 --qa-status pass --plan
+```
+
+Apply only with the action-specific approval flag, `--actor`, and `--at`. The QA action blocks refinement after two unsuccessful attempts.
+
+Handoff contract when code cannot call MCP directly: Stage 08 is NOT READY until a live Pencil agent has targeted the Autodesign-owned virtual `.pen` filePath, created wireframe/prototype frames with `batch_design`, exported screenshots with `export_nodes`, and written evidence JSON containing `evidenceType`, `mcpToolCalls`, `targetPenPath`, `liveCheckEvidenceHash`, `batchDesign.createdNodeIds`, `exportNodes.nodeIds`, per-screen `frames[]`, and `exports[]` with matching path/bytes/sha256/node bindings.
+
 ## Materialized Files
 
-The bootstrap runtime copies `assets/payload/workspace-template/` into the target project. Stage 07 materializes:
+The bootstrap runtime copies `assets/payload/workspace-template/` into the target project. Stage 08 materializes:
 
 - `AGENTS.md`
 - `.codex/config.toml`
@@ -155,3 +173,4 @@ The bootstrap runtime copies `assets/payload/workspace-template/` into the targe
 6. For private subskill requests, run `can-run-subskill.mjs` and report readiness before any apply command.
 7. For canonical generation requests, run `generate-canonical.mjs --plan` first and apply only with `--approve-canonical-generation --actor <actor> --at <timestamp>`.
 8. For visual reference requests, run `generate-visual-references.mjs --plan` first. Apply prompt, candidate, or selection records only with that action's explicit approval flag.
+9. For Pencil, DS, prototype, or QA requests, run `generate-pencil-prototype.mjs --plan` first. Apply only with the action-specific approval flag, `--actor`, and `--at`.

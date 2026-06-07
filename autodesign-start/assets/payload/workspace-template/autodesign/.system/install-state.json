@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "stage": "07-visual-reference-gates",
+  "stage": "08-pencil-prototype-and-design-system",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
-  "runtime": "bootstrap-state-subskill-contracts-canonical-pipeline-and-visual-reference-gates",
+  "runtime": "bootstrap-state-subskill-contracts-canonical-visual-reference-pencil-ds-prototype-qa-and-refinement-gates",
   "materializedBy": "autodesign-start/assets/payload/scripts/bootstrap.mjs",
   "stateScripts": {
     "validateState": "autodesign-start/assets/payload/scripts/validate-state.mjs",
@@ -12,7 +12,8 @@
     "recordGate": "autodesign-start/assets/payload/scripts/record-gate.mjs",
     "dirtyArtifacts": "autodesign-start/assets/payload/scripts/dirty-artifacts.mjs",
     "generateCanonical": "autodesign-start/assets/payload/scripts/generate-canonical.mjs",
-    "generateVisualReferences": "autodesign-start/assets/payload/scripts/generate-visual-references.mjs"
+    "generateVisualReferences": "autodesign-start/assets/payload/scripts/generate-visual-references.mjs",
+    "generatePencilPrototype": "autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs"
   },
   "approvalGates": {
     "applyRequires": [
@@ -43,6 +44,49 @@
       "--reference-id",
       "--actor",
       "--at"
+    ],
+    "pencilLiveCheckRequires": [
+      "--approve-pencil-live-check",
+      "--actor",
+      "--at",
+      "pencil-mcp.get_editor_state",
+      "active-pencil-agent-opened-autodesign-pen",
+      "pen-file-sha256-and-bytes-match"
+    ],
+    "pencilWireframeRequires": [
+      "--approve-pencil-wireframes",
+      "--actor",
+      "--at",
+      "pencil.live-check.approved",
+      "pencil-mcp.batch_design",
+      "pencil-mcp.export_nodes",
+      "--pencil-evidence-path",
+      "real-canvas-export-paths"
+    ],
+    "designSystemPrimitivesRequires": [
+      "--approve-design-system-primitives",
+      "--actor",
+      "--at"
+    ],
+    "designSystemGenerationRequires": [
+      "--approve-design-system-generation",
+      "--actor",
+      "--at"
+    ],
+    "prototypeGenerationRequires": [
+      "--approve-prototype-generation",
+      "--actor",
+      "--at",
+      "pencil-mcp.batch_design",
+      "pencil-mcp.export_nodes",
+      "--pencil-evidence-path",
+      "real-canvas-export-paths"
+    ],
+    "prototypeQaRequires": [
+      "--approve-prototype-qa",
+      "--actor",
+      "--at",
+      "--refinement-attempt 0..2"
     ]
   },
   "materializedFiles": [
@@ -61,11 +105,11 @@
   "disabledBehaviors": {
     "canonicalGeneration": false,
     "imageGeneration": false,
-    "pencilOperations": true,
+    "pencilOperations": false,
     "visualReferenceGeneration": false,
-    "designSystemGeneration": true,
-    "prototypeGeneration": true,
+    "designSystemGeneration": false,
+    "prototypeGeneration": false,
     "handoff": true,
-    "realSubskillPhaseBehavior": true
+    "realSubskillPhaseBehavior": false
   }
 }

@@ -1,35 +1,51 @@
 ---
 name: autodesign-prototype
-description: Private Stage 06 contract for the Autodesign prototype subskill. Contract-only; checks prerequisites and does not generate prototypes.
+description: Private Stage 08 prototype subskill. Persists prototype metadata and real canvas export path records without generating frontend handoff.
 ---
 
-# Autodesign Prototype Contract
+# Autodesign Prototype
 
-This private payload subskill is not public. Enter it only through `autodesign-start` or a later orchestrator after running the deterministic readiness check.
+This private payload subskill is not public. Enter it only through `autodesign-start` or a later orchestrator after running deterministic readiness checks.
 
 ## Required Upstream Artifacts
 
 - `canonical.screen-model` at `autodesign/outputs/canonical/screen-model.json`
 - `canonical.interaction-model` at `autodesign/outputs/canonical/interaction-model.json`
-- `pencil.wireframe-set` at `autodesign/outputs/pencil/wireframes`
+- `canonical.screen-state-matrix` at `autodesign/outputs/canonical/screen-state-matrix.json`
+- `visual.reference-set` after approved selected visual references
+- `pencil.live-check` at `autodesign/outputs/pencil/live-check.json`
+- `pencil.wireframe-set` at `autodesign/outputs/pencil/wireframes/wireframe-metadata.json`
+- `pencil.canvas-exports` at `autodesign/outputs/pencil/canvas-exports.json`
 - `design-system.tokens` at `autodesign/outputs/design-system/tokens.json`
+- `design-system.contracts` at `autodesign/outputs/design-system/contracts.json`
 
 ## Output Artifacts
 
-- `prototype.package` at `autodesign/outputs/prototype`
-
-Stage 06 declares this output only. Do not create or update it.
+- `prototype.package` at `autodesign/outputs/prototype/prototype-metadata.json`
+- `prototype.canvas-exports` at `autodesign/outputs/prototype/canvas-exports.json`
 
 ## Hard Gates
 
 - `scripts/can-run-subskill.mjs --workspace <workspace> --subskill prototype` must pass.
-- `manifest.disabledBehaviors.prototypeGeneration` must be `true`.
-- `manifest.disabledBehaviors.realSubskillPhaseBehavior` must be `true`.
-- The artifact graph must contain every required upstream and output artifact id.
+- `visual.reference-selection` must be approved and contain selected records.
+- `manifest.disabledBehaviors.prototypeGeneration` must be `false`.
+- Pencil live-check, wireframes, canvas export records, DS tokens, and DS contracts must already be generated.
+- A live Pencil agent must run `batch_design` against the Autodesign-owned virtual `.pen` filePath, create prototype frames, run `export_nodes`, and write a `--pencil-evidence-path` JSON record.
+- The target virtual `.pen` filePath must be under `autodesign/outputs/pencil/`.
+- Evidence must include `batchDesign.createdNodeIds`, `exportNodes.nodeIds`, frame bindings, and every prototype canvas export path must exist and match the evidence hashes.
 
-## Fail Fast
+## Run
 
-- Stop if state validation fails.
-- Stop if graph dependencies are missing or cyclic.
-- Stop if any required upstream artifact path is missing.
-- If all gates pass, report contract-only status and stop before prototype generation.
+Plan first:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action prototype --pencil-evidence-path <path> --canvas-export-path <path> --plan
+```
+
+Apply only with explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action prototype --pencil-evidence-path <path> --canvas-export-path <path> --apply --approve-prototype-generation --actor <actor> --at <timestamp>
+```
+
+The script records prototype metadata and export paths only. It does not generate frontend code, handoff files, or fake Pencil output. Stage 08 is NOT READY until the live Pencil agent action is completed and evidence cross-checks the virtual Pencil filePath plus export file bytes.

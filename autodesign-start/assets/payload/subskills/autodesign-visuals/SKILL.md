@@ -1,6 +1,6 @@
 ---
 name: autodesign-visuals
-description: Private Stage 07 subskill for visual reference prompt records, candidate records, and explicitly approved selected references. Does not create or fake images.
+description: Private visual reference subskill for prompt records, candidate records, and explicitly approved selected references. Does not create or fake images.
 ---
 
 # Autodesign Visuals Contract
@@ -66,4 +66,4 @@ node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --wo
 - Stop if a generated output path does not exist or is not an image file.
 - Stop if selection lacks explicit reference ids and selected-reference approval.
 
-Stage 07 records prompts, candidate metadata, output paths, review metadata, and selected references. It must not create or fake images, perform Pencil operations, generate design-system artifacts, generate prototypes, or generate handoff material.
+The visuals subskill records prompts, candidate metadata, output paths, review metadata, and selected references. It must not create or fake images, perform Pencil operations, generate design-system artifacts, generate prototypes, or generate handoff material.

@@ -6,11 +6,11 @@ Installable Codex skill package for `eatsteak/autodesign`.
 
 `autodesign-start/` is the only public skill exposed at install time. Runtime assets, private expanded subskill contracts, scripts, hooks, and workspace files are bundled under `autodesign-start/assets/payload/`.
 
-Stage 07 implements bootstrap workspace materialization, deterministic manifest and artifact graph state management, private subskill readiness checks, canonical pipeline generation from real project input files, and visual reference gates. Canonical generation emits project brief/interview intent, requirements/stories, brand direction, UX rules, screen model, interaction model, coverage matrix, decision log, navigation, screen-state matrix, and unapproved primary visual anchor proposals.
+Stage 08 implements bootstrap workspace materialization, deterministic manifest and artifact graph state management, private subskill readiness checks, canonical pipeline generation from real project input files, visual reference gates, and Pencil/DS/prototype/QA metadata records. Canonical generation emits project brief/interview intent, requirements/stories, brand direction, UX rules, screen model, interaction model, coverage matrix, decision log, navigation, screen-state matrix, and unapproved primary visual anchor proposals.
 
-Stage 07 adds prompt, candidate, and selected-reference records for visual references. Prompt records instruct the active agent to generate real images without hardcoding an image model. Candidate records persist only real generated output paths and review metadata. Selected references require explicit user approval and cannot be auto-selected.
+Visual reference gates add prompt, candidate, and selected-reference records. Prompt records instruct the active agent to generate real images without hardcoding an image model. Candidate records persist only real generated output paths and review metadata. Selected references require explicit user approval and cannot be auto-selected.
 
-Stage 07 does not implement Pencil operations, design-system work, prototype generation, handoff, report generation, skill optimization, or later downstream phase behavior.
+Stage 08 adds a `generate-pencil-prototype.mjs` script for Pencil live-check records, wireframe metadata, canvas export path records, primitive inventory, DS tokens/contracts, prototype metadata, semantic visual QA, and a max-two-refinement gate. Pencil canvas work remains live-agent work through Pencil; scripts fail fast if live Pencil evidence, active `batch_design` frame evidence, `export_nodes` node bindings, an Autodesign-owned virtual `.pen` filePath, or real export files are missing. Frontend handoff is not implemented.
 
 ## Bootstrap Runtime
 
@@ -47,7 +47,7 @@ The bootstrap script materializes `AGENTS.md`, `.codex/config.toml`, `.codex/hoo
 
 ## Manifest And Artifact Graph
 
-Stage 07 materializes:
+Stage 08 materializes:
 
 - `autodesign/manifest.json`
 - `autodesign/artifact-graph.json`
@@ -119,3 +119,20 @@ Select references only by explicit id and explicit approval:
 ```bash
 node autodesign-start/assets/payload/scripts/generate-visual-references.mjs --workspace /absolute/path/to/project --action selection --reference-id <candidate-id> --apply --approve-visual-reference-selection --actor <actor> --at <timestamp>
 ```
+
+## Stage 08 Records
+
+Record Pencil, DS, prototype, and QA metadata only after selected visual references are approved:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action live-check --pencil-live-check-source-path <path> --plan
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action wireframes --pencil-evidence-path <path> --canvas-export-path <path> --plan
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action primitives --plan
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action ds --plan
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action prototype --pencil-evidence-path <path> --canvas-export-path <path> --plan
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace /absolute/path/to/project --action qa --refinement-attempt 0 --qa-status pass --plan
+```
+
+Apply requires the matching `--approve-*` flag, `--actor`, and `--at`. Pencil-derived actions must target `autodesign/outputs/pencil/*.pen`, validate real canvas export files, and cross-check evidence JSON against the virtual Pencil filePath plus export file bytes.
+
+If code is running without direct MCP access, Stage 08 remains NOT READY until a live Pencil agent completes this handoff: target the owned virtual `.pen` filePath, run `get_editor_state`, run `batch_design` to create wireframe/prototype frames, run `export_nodes`, and write evidence JSON with tool calls, target filePath, per-screen frame node ids, export node bindings, and export path/hash records.

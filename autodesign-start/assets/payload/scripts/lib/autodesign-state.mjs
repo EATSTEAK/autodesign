@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-export const STAGE = "07-visual-reference-gates";
+export const STAGE = "08-pencil-prototype-and-design-system";
 export const DEFAULT_MANIFEST_REL = "autodesign/manifest.json";
 export const DEFAULT_GRAPH_REL = "autodesign/artifact-graph.json";
 
@@ -46,12 +46,14 @@ const REFERENCE_ONLY_KINDS = new Set([
   "prototype",
   "handoff"
 ]);
-const STAGE_07_DISABLED_BEHAVIOR_KEYS = new Set([
+const STAGE_08_ENABLED_BEHAVIOR_KEYS = new Set([
   "pencilOperations",
   "designSystemGeneration",
   "prototypeGeneration",
-  "handoff",
   "realSubskillPhaseBehavior"
+]);
+const STAGE_08_DISABLED_BEHAVIOR_KEYS = new Set([
+  "handoff"
 ]);
 const VALID_SUBSKILL_STATUSES = new Set([
   "contract-only",
@@ -68,6 +70,19 @@ const VALID_SUBSKILL_HARD_GATES = new Set([
   "canonical-visual-anchors.generated",
   "canonical-visual-anchor-selection.approved",
   "visual-reference-generation.enabled",
+  "selected-visual-references.approved",
+  "pencil-operations.enabled",
+  "design-system-generation.enabled",
+  "prototype-generation.enabled",
+  "handoff.disabled",
+  "pencil-live-check.generated",
+  "pencil-wireframes.generated",
+  "design-system-primitives.generated",
+  "design-system-tokens.generated",
+  "design-system-contracts.generated",
+  "prototype-package.generated",
+  "prototype-visual-qa.generated",
+  "prototype-refinement-limit.valid",
   "no-real-phase-behavior"
 ]);
 
@@ -223,6 +238,23 @@ export async function checkSubskillCanRun(state, subskillName) {
       canonicalVisualAnchorSelectionApproved: false,
       visualReferenceGenerationEnabled: state.manifest.disabledBehaviors
         && state.manifest.disabledBehaviors.visualReferenceGeneration === false,
+      selectedVisualReferencesApproved: false,
+      pencilOperationsEnabled: state.manifest.disabledBehaviors
+        && state.manifest.disabledBehaviors.pencilOperations === false,
+      designSystemGenerationEnabled: state.manifest.disabledBehaviors
+        && state.manifest.disabledBehaviors.designSystemGeneration === false,
+      prototypeGenerationEnabled: state.manifest.disabledBehaviors
+        && state.manifest.disabledBehaviors.prototypeGeneration === false,
+      handoffDisabled: state.manifest.disabledBehaviors
+        && state.manifest.disabledBehaviors.handoff === true,
+      pencilLiveCheckGenerated: false,
+      pencilWireframesGenerated: false,
+      designSystemPrimitivesGenerated: false,
+      designSystemTokensGenerated: false,
+      designSystemContractsGenerated: false,
+      prototypePackageGenerated: false,
+      prototypeVisualQaGenerated: false,
+      prototypeRefinementLimitValid: false,
       noRealPhaseBehavior: false
     },
     hardGates: [],
@@ -275,6 +307,15 @@ export async function checkSubskillCanRun(state, subskillName) {
   result.checks.platformSelectionPresent = await detectPlatformSelectionPresent(state);
   result.checks.canonicalVisualAnchorsGenerated = await detectGeneratedArtifactPresent(state, "canonical.visual-anchor-proposals");
   result.checks.canonicalVisualAnchorSelectionApproved = isGateApproved(state.manifest, "canonical.visual-anchor-selection");
+  result.checks.selectedVisualReferencesApproved = await detectSelectedVisualReferencesApproved(state);
+  result.checks.pencilLiveCheckGenerated = await detectPencilLiveCheckGenerated(state);
+  result.checks.pencilWireframesGenerated = await detectPencilEvidenceArtifactGenerated(state, "pencil.wireframe-set", "pencil-mcp-wireframe-generation");
+  result.checks.designSystemPrimitivesGenerated = await detectGeneratedArtifactPresent(state, "design-system.primitives");
+  result.checks.designSystemTokensGenerated = await detectGeneratedArtifactPresent(state, "design-system.tokens");
+  result.checks.designSystemContractsGenerated = await detectGeneratedArtifactPresent(state, "design-system.contracts");
+  result.checks.prototypePackageGenerated = await detectPencilEvidenceArtifactGenerated(state, "prototype.package", "pencil-mcp-prototype-generation");
+  result.checks.prototypeVisualQaGenerated = await detectGeneratedArtifactPresent(state, "prototype.visual-qa-report");
+  result.checks.prototypeRefinementLimitValid = await detectPrototypeRefinementLimitValid(state);
 
   const artifactIndex = buildArtifactIndex(state.graph);
   const upstreamArtifacts = Array.isArray(contract.requiredUpstreamArtifacts) ? contract.requiredUpstreamArtifacts : [];
@@ -393,6 +434,19 @@ export async function checkSubskillCanRun(state, subskillName) {
     "canonical-visual-anchors.generated": result.checks.canonicalVisualAnchorsGenerated,
     "canonical-visual-anchor-selection.approved": result.checks.canonicalVisualAnchorSelectionApproved,
     "visual-reference-generation.enabled": result.checks.visualReferenceGenerationEnabled,
+    "selected-visual-references.approved": result.checks.selectedVisualReferencesApproved,
+    "pencil-operations.enabled": result.checks.pencilOperationsEnabled,
+    "design-system-generation.enabled": result.checks.designSystemGenerationEnabled,
+    "prototype-generation.enabled": result.checks.prototypeGenerationEnabled,
+    "handoff.disabled": result.checks.handoffDisabled,
+    "pencil-live-check.generated": result.checks.pencilLiveCheckGenerated,
+    "pencil-wireframes.generated": result.checks.pencilWireframesGenerated,
+    "design-system-primitives.generated": result.checks.designSystemPrimitivesGenerated,
+    "design-system-tokens.generated": result.checks.designSystemTokensGenerated,
+    "design-system-contracts.generated": result.checks.designSystemContractsGenerated,
+    "prototype-package.generated": result.checks.prototypePackageGenerated,
+    "prototype-visual-qa.generated": result.checks.prototypeVisualQaGenerated,
+    "prototype-refinement-limit.valid": result.checks.prototypeRefinementLimitValid,
     "no-real-phase-behavior": result.checks.noRealPhaseBehavior
   };
 
@@ -431,7 +485,7 @@ export async function checkSubskillCanRun(state, subskillName) {
     result.warnings.push({
       check: "contract-only",
       path: contract.path,
-      message: "Contract boundary can be entered, but later downstream phase behavior must not run in Stage 07."
+      message: "Contract boundary can be entered, but disabled downstream behavior must still be respected."
     });
   }
 
@@ -654,6 +708,11 @@ export function formatSubskillRunCheck(result) {
     `canonical visual anchors generated: ${result.checks.canonicalVisualAnchorsGenerated ? "yes" : "no"}`,
     `canonical visual anchor approved: ${result.checks.canonicalVisualAnchorSelectionApproved ? "yes" : "no"}`,
     `visual reference generation enabled: ${result.checks.visualReferenceGenerationEnabled ? "yes" : "no"}`,
+    `selected visual references approved: ${result.checks.selectedVisualReferencesApproved ? "yes" : "no"}`,
+    `pencil operations enabled: ${result.checks.pencilOperationsEnabled ? "yes" : "no"}`,
+    `design-system generation enabled: ${result.checks.designSystemGenerationEnabled ? "yes" : "no"}`,
+    `prototype generation enabled: ${result.checks.prototypeGenerationEnabled ? "yes" : "no"}`,
+    `handoff disabled: ${result.checks.handoffDisabled ? "yes" : "no"}`,
     `errors: ${result.errors.length}`,
     `warnings: ${result.warnings.length}`
   ];
@@ -976,20 +1035,26 @@ function validateDisabledBehaviors(manifest, result) {
   }
 
   if (manifest.disabledBehaviors.canonicalGeneration !== false) {
-    addError(result, "manifest.disabledBehaviors.canonicalGeneration", "Stage 07 must keep canonical generation available for canonical upstream repair");
+    addError(result, "manifest.disabledBehaviors.canonicalGeneration", "Stage 08 must keep canonical generation available for upstream repair");
   }
 
   if (manifest.disabledBehaviors.imageGeneration !== false) {
-    addError(result, "manifest.disabledBehaviors.imageGeneration", "Stage 07 must allow active-agent image generation instructions");
+    addError(result, "manifest.disabledBehaviors.imageGeneration", "Stage 08 must allow active-agent image generation instructions for upstream visual references");
   }
 
   if (manifest.disabledBehaviors.visualReferenceGeneration !== false) {
-    addError(result, "manifest.disabledBehaviors.visualReferenceGeneration", "Stage 07 must enable visual reference record generation");
+    addError(result, "manifest.disabledBehaviors.visualReferenceGeneration", "Stage 08 must keep selected visual reference records available");
   }
 
-  for (const key of STAGE_07_DISABLED_BEHAVIOR_KEYS) {
+  for (const key of STAGE_08_ENABLED_BEHAVIOR_KEYS) {
+    if (manifest.disabledBehaviors[key] !== false) {
+      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 08 must enable this implemented behavior");
+    }
+  }
+
+  for (const key of STAGE_08_DISABLED_BEHAVIOR_KEYS) {
     if (manifest.disabledBehaviors[key] !== true) {
-      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 07 must keep this downstream behavior disabled");
+      addError(result, `manifest.disabledBehaviors.${key}`, "Stage 08 must keep this behavior disabled");
     }
   }
 }
@@ -1129,8 +1194,8 @@ function validateGraph(graph, result) {
       addError(result, `${basePath}.referenceOnly`, "downstream visual/Pencil/DS/prototype/handoff artifacts must be reference-only");
     }
 
-    if (artifact.kind !== "visual-reference" && REFERENCE_ONLY_KINDS.has(artifact.kind) && artifact.generated !== false) {
-      addError(result, `${basePath}.generated`, "Pencil/DS/prototype/handoff artifacts must not be generated in Stage 07");
+    if (artifact.kind === "handoff" && artifact.generated !== false) {
+      addError(result, `${basePath}.generated`, "Handoff artifacts must not be generated in Stage 08");
     }
 
     result.counts.dependencies += Array.isArray(artifact.upstreamDependencies) ? artifact.upstreamDependencies.length : 0;
@@ -1476,6 +1541,217 @@ async function detectGeneratedArtifactPresent(state, artifactId) {
   }
 
   return pathExists(resolveAgainst(state.workspaceRoot, artifact.path));
+}
+
+async function detectPencilLiveCheckGenerated(state) {
+  const artifact = buildArtifactIndex(state.graph).get("pencil.live-check");
+  if (!artifact || artifact.generated !== true) {
+    return false;
+  }
+
+  let liveCheckArtifact;
+  try {
+    liveCheckArtifact = await readJsonFile(resolveAgainst(state.workspaceRoot, artifact.path));
+  } catch (error) {
+    return false;
+  }
+
+  const liveCheck = liveCheckArtifact.liveCheck || {};
+  const penFile = liveCheck.penFile || {};
+  if (liveCheck.evidenceType !== "pencil-mcp-live-check") {
+    return false;
+  }
+  if (!Array.isArray(liveCheck.toolCalls) || !liveCheck.toolCalls.includes("get_editor_state")) {
+    return false;
+  }
+  if (!penFile.path || penFile.path !== liveCheckArtifact.pencilTarget?.path) {
+    return false;
+  }
+  return pencilTargetMatches(liveCheckArtifact.pencilTarget, penFile);
+}
+
+async function detectPencilEvidenceArtifactGenerated(state, artifactId, evidenceType) {
+  const artifact = buildArtifactIndex(state.graph).get(artifactId);
+  if (!artifact || artifact.generated !== true) {
+    return false;
+  }
+
+  let value;
+  try {
+    value = await readJsonFile(resolveAgainst(state.workspaceRoot, artifact.path));
+  } catch (error) {
+    return false;
+  }
+
+  const evidence = value.pencilEvidence || {};
+  const penFile = value.pencilTarget || {};
+  if (evidence.evidenceType !== evidenceType) {
+    return false;
+  }
+  if (typeof evidence.evidenceHash !== "string" || evidence.evidenceHash.length === 0) {
+    return false;
+  }
+  if (!Number.isInteger(evidence.frameCount) || evidence.frameCount <= 0) {
+    return false;
+  }
+  if (!Number.isInteger(evidence.exportCount) || evidence.exportCount <= 0) {
+    return false;
+  }
+  if (!pencilTargetLooksValid(penFile)) {
+    return false;
+  }
+
+  const exportArtifactId = artifactId === "pencil.wireframe-set"
+    ? "pencil.canvas-exports"
+    : artifactId === "prototype.package" ? "prototype.canvas-exports" : null;
+  if (!exportArtifactId) {
+    return false;
+  }
+  return actualCanvasExportsMatch(state, exportArtifactId);
+}
+
+function pencilTargetMatches(pencilTarget, penFile) {
+  return pencilTargetLooksValid(pencilTarget) && pencilTargetLooksValid(penFile) && pencilTarget.path === penFile.path;
+}
+
+function pencilTargetLooksValid(value) {
+  return Boolean(value)
+    && typeof value.path === "string"
+    && value.path.startsWith("autodesign/outputs/pencil/")
+    && value.path.endsWith(".pen")
+    && value.ownership === "autodesign-owned"
+    && value.persistence === "pencil-mcp-virtual-filePath"
+    && value.onDiskFileRequired === false;
+}
+
+async function actualCanvasExportsMatch(state, artifactId) {
+  const artifact = buildArtifactIndex(state.graph).get(artifactId);
+  if (!artifact || artifact.generated !== true) {
+    return false;
+  }
+
+  let exportArtifact;
+  try {
+    exportArtifact = await readJsonFile(resolveAgainst(state.workspaceRoot, artifact.path));
+  } catch (error) {
+    return false;
+  }
+
+  const records = Array.isArray(exportArtifact.records) ? exportArtifact.records : [];
+  if (records.length === 0) {
+    return false;
+  }
+
+  for (const record of records) {
+    if (!record || typeof record.path !== "string" || typeof record.sha256 !== "string" || !Number.isInteger(record.bytes)) {
+      return false;
+    }
+    if (typeof record.pencilNodeId !== "string" || typeof record.screenId !== "string") {
+      return false;
+    }
+    try {
+      const bytes = await fs.readFile(resolveAgainst(state.workspaceRoot, record.path));
+      if (bytes.length !== record.bytes || sha256(bytes) !== record.sha256 || !detectExportFileType(bytes)) {
+        return false;
+      }
+    } catch (error) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function detectExportFileType(bytes) {
+  if (
+    bytes.length >= 8
+    && bytes[0] === 0x89
+    && bytes[1] === 0x50
+    && bytes[2] === 0x4e
+    && bytes[3] === 0x47
+    && bytes[4] === 0x0d
+    && bytes[5] === 0x0a
+    && bytes[6] === 0x1a
+    && bytes[7] === 0x0a
+  ) {
+    return "png";
+  }
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return "jpeg";
+  }
+  if (bytes.length >= 12 && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP") {
+    return "webp";
+  }
+  if (bytes.length >= 4 && bytes.toString("ascii", 0, 4) === "%PDF") {
+    return "pdf";
+  }
+  return null;
+}
+
+async function detectSelectedVisualReferencesApproved(state) {
+  if (!isGateApproved(state.manifest, "visual.reference-selection")) {
+    return false;
+  }
+
+  const artifact = buildArtifactIndex(state.graph).get("visual.reference-selection");
+  if (!artifact || artifact.generated !== true) {
+    return false;
+  }
+
+  const selectionPath = resolveAgainst(state.workspaceRoot, artifact.path);
+  if (!await pathExists(selectionPath)) {
+    return false;
+  }
+
+  let selection;
+  try {
+    selection = await readJsonFile(selectionPath);
+  } catch (error) {
+    return false;
+  }
+
+  if (!Array.isArray(selection.selectedReferenceIds) || selection.selectedReferenceIds.length === 0) {
+    return false;
+  }
+
+  if (!Array.isArray(selection.records) || selection.records.length === 0) {
+    return false;
+  }
+
+  return selection.records.every((record) => record
+    && record.selected === true
+    && record.selectionApproval
+    && record.selectionApproval.approved === true);
+}
+
+async function detectPrototypeRefinementLimitValid(state) {
+  const artifact = buildArtifactIndex(state.graph).get("prototype.refinement-log");
+  if (!artifact) {
+    return false;
+  }
+
+  const logPath = resolveAgainst(state.workspaceRoot, artifact.path);
+  if (!await pathExists(logPath)) {
+    return true;
+  }
+
+  let log;
+  try {
+    log = await readJsonFile(logPath);
+  } catch (error) {
+    return false;
+  }
+
+  const gate = log.refinementGate || {};
+  if (gate.maxAttempts !== undefined && gate.maxAttempts !== 2) {
+    return false;
+  }
+
+  const attempts = Array.isArray(log.attempts) ? log.attempts : [];
+  if (attempts.length > 2) {
+    return false;
+  }
+
+  return attempts.every((attempt) => Number.isInteger(attempt.attempt) && attempt.attempt >= 0 && attempt.attempt <= 2);
 }
 
 function isGateApproved(manifest, gateId) {

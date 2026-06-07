@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "07-visual-reference-gates",
+  "stage": "08-pencil-prototype-and-design-system",
   "graphId": "autodesign-default-artifact-graph",
   "artifacts": [
     {
@@ -415,9 +415,33 @@
       }
     },
     {
+      "id": "pencil.live-check",
+      "kind": "pencil",
+      "path": "autodesign/outputs/pencil/live-check.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "visual.reference-set"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "liveCheckEvidence",
+          "targetPenPath"
+        ],
+        "mayChange": [
+          "checkedAt",
+          "summary"
+        ],
+        "notes": "Pencil live-check records supplied get_editor_state evidence before Pencil-derived actions."
+      }
+    },
+    {
       "id": "pencil.wireframe-set",
       "kind": "pencil",
-      "path": "autodesign/outputs/pencil/wireframes",
+      "path": "autodesign/outputs/pencil/wireframes/wireframe-metadata.json",
       "sourceOfTruth": false,
       "generated": false,
       "referenceOnly": true,
@@ -425,21 +449,48 @@
       "upstreamDependencies": [
         "canonical.screen-model",
         "canonical.interaction-model",
-        "canonical.screen-state-matrix"
+        "canonical.screen-state-matrix",
+        "visual.reference-set",
+        "pencil.live-check"
       ],
       "reconcile": {
         "policy": "may-change",
         "preserve": [
           "manualPencilEdits",
           "approvedFrames",
-          "componentNames"
+          "componentNames",
+          "targetPenPath"
         ],
         "mayChange": [
           "layoutGeometry",
           "frameStructure",
-          "visualBindings"
+          "visualBindings",
+          "canvasExportPaths"
         ],
-        "notes": "Wireframe output remains a later-stage downstream target in Stage 07."
+        "notes": "Wireframe metadata records real Pencil output references and never fakes canvas content."
+      }
+    },
+    {
+      "id": "pencil.canvas-exports",
+      "kind": "pencil",
+      "path": "autodesign/outputs/pencil/canvas-exports.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "pencil.wireframe-set"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "exportPaths",
+          "exportHashes"
+        ],
+        "mayChange": [
+          "exportRecords"
+        ],
+        "notes": "Canvas export path records validate existing PNG/JPEG/WebP/PDF files inside the workspace."
       }
     },
     {
@@ -463,9 +514,10 @@
         "mayChange": [
           "colorPrimitives",
           "typePrimitives",
-          "spacingPrimitives"
+          "spacingPrimitives",
+          "radiusPrimitives"
         ],
-        "notes": "Primitive design tokens remain later-stage downstream targets in Stage 07."
+        "notes": "Primitive inventory is generated deterministically from selected references and canonical brand direction."
       }
     },
     {
@@ -492,13 +544,39 @@
           "semanticTokens",
           "implementationNotes"
         ],
-        "notes": "Design-system token output is not generated in Stage 07."
+        "notes": "Design-system tokens are generated from primitives, selected references, and Pencil wireframe metadata."
+      }
+    },
+    {
+      "id": "design-system.contracts",
+      "kind": "design-system",
+      "path": "autodesign/outputs/design-system/contracts.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "design-system.tokens",
+        "canonical.screen-model",
+        "pencil.wireframe-set"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "approvedComponentContracts",
+          "manualOverrides"
+        ],
+        "mayChange": [
+          "componentContracts",
+          "stateContracts"
+        ],
+        "notes": "Design-system contracts define component semantics and do not generate frontend code."
       }
     },
     {
       "id": "prototype.package",
       "kind": "prototype",
-      "path": "autodesign/outputs/prototype",
+      "path": "autodesign/outputs/prototype/prototype-metadata.json",
       "sourceOfTruth": false,
       "generated": false,
       "referenceOnly": true,
@@ -507,8 +585,12 @@
         "canonical.screen-model",
         "canonical.interaction-model",
         "canonical.screen-state-matrix",
+        "visual.reference-set",
+        "pencil.live-check",
         "pencil.wireframe-set",
-        "design-system.tokens"
+        "pencil.canvas-exports",
+        "design-system.tokens",
+        "design-system.contracts"
       ],
       "reconcile": {
         "policy": "may-change",
@@ -517,11 +599,88 @@
           "manualImplementationNotes"
         ],
         "mayChange": [
-          "prototypeFiles",
+          "prototypeMetadata",
           "interactionBindings",
           "previewMetadata"
         ],
-        "notes": "Prototype package remains a later-stage downstream target in Stage 07."
+        "notes": "Prototype metadata records semantic bindings and Pencil export paths only; frontend handoff is disabled."
+      }
+    },
+    {
+      "id": "prototype.canvas-exports",
+      "kind": "prototype",
+      "path": "autodesign/outputs/prototype/canvas-exports.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "prototype.package",
+        "pencil.live-check"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "exportPaths",
+          "exportHashes"
+        ],
+        "mayChange": [
+          "exportRecords"
+        ],
+        "notes": "Prototype canvas export path records validate existing PNG/JPEG/WebP/PDF files inside the workspace."
+      }
+    },
+    {
+      "id": "prototype.visual-qa-report",
+      "kind": "prototype",
+      "path": "autodesign/outputs/prototype/visual-qa-report.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "visual.reference-set",
+        "pencil.wireframe-set",
+        "pencil.canvas-exports",
+        "design-system.tokens",
+        "design-system.contracts",
+        "prototype.package",
+        "prototype.canvas-exports"
+      ],
+      "reconcile": {
+        "policy": "may-change",
+        "preserve": [
+          "manualQaNotes",
+          "approvedQaOutcome"
+        ],
+        "mayChange": [
+          "semanticChecks",
+          "qaStatus"
+        ],
+        "notes": "Semantic visual QA compares selected references, Pencil metadata, DS contracts, and prototype records."
+      }
+    },
+    {
+      "id": "prototype.refinement-log",
+      "kind": "prototype",
+      "path": "autodesign/outputs/prototype/refinement-log.json",
+      "sourceOfTruth": false,
+      "generated": false,
+      "referenceOnly": true,
+      "required": false,
+      "upstreamDependencies": [
+        "prototype.visual-qa-report"
+      ],
+      "reconcile": {
+        "policy": "preserve",
+        "preserve": [
+          "attemptHistory",
+          "manualGateDecisions"
+        ],
+        "mayChange": [
+          "currentGateStatus"
+        ],
+        "notes": "Refinement log enforces the Stage 08 max-two-refinement gate."
       }
     },
     {
@@ -546,8 +705,13 @@
         "log.decision-log",
         "visual.reference-set",
         "pencil.wireframe-set",
+        "pencil.canvas-exports",
         "design-system.tokens",
-        "prototype.package"
+        "design-system.contracts",
+        "prototype.package",
+        "prototype.canvas-exports",
+        "prototype.visual-qa-report",
+        "prototype.refinement-log"
       ],
       "reconcile": {
         "policy": "may-change",
@@ -559,7 +723,7 @@
           "exportedArtifacts",
           "deliveryChecklist"
         ],
-        "notes": "Handoff package remains a later-stage downstream target in Stage 07."
+        "notes": "Handoff package remains a later-stage target and is not generated in Stage 08."
       }
     },
     {
@@ -587,7 +751,12 @@
         "pencil.wireframe-set",
         "design-system.tokens",
         "prototype.package",
-        "handoff.package"
+        "handoff.package",
+        "pencil.canvas-exports",
+        "design-system.contracts",
+        "prototype.canvas-exports",
+        "prototype.visual-qa-report",
+        "prototype.refinement-log"
       ],
       "reconcile": {
         "policy": "preserve",

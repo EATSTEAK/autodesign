@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "07-visual-reference-gates",
+  "stage": "08-pencil-prototype-and-design-system",
   "publicSkills": [
     "autodesign-start"
   ],
@@ -113,6 +113,84 @@
       "requiresApproval": [
         "--approve-visual-reference-selection"
       ]
+    },
+    {
+      "name": "record-pencil-live-check-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action live-check --pencil-live-check-source-path <path> --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "record-pencil-live-check-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action live-check --pencil-live-check-source-path <path> --apply --approve-pencil-live-check --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-pencil-live-check"
+      ]
+    },
+    {
+      "name": "record-pencil-wireframes-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action wireframes --pencil-evidence-path <path> --canvas-export-path <path> --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "record-pencil-wireframes-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action wireframes --pencil-evidence-path <path> --canvas-export-path <path> --apply --approve-pencil-wireframes --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-pencil-wireframes"
+      ]
+    },
+    {
+      "name": "generate-ds-primitives-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action primitives --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "generate-ds-primitives-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action primitives --apply --approve-design-system-primitives --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-design-system-primitives"
+      ]
+    },
+    {
+      "name": "generate-ds-tokens-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action ds --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "generate-ds-tokens-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action ds --apply --approve-design-system-generation --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-design-system-generation"
+      ]
+    },
+    {
+      "name": "record-prototype-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action prototype --pencil-evidence-path <path> --canvas-export-path <path> --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "record-prototype-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action prototype --pencil-evidence-path <path> --canvas-export-path <path> --apply --approve-prototype-generation --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-prototype-generation"
+      ]
+    },
+    {
+      "name": "record-prototype-qa-plan",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action qa --refinement-attempt <0|1|2> --qa-status <status> --plan",
+      "writesFiles": false
+    },
+    {
+      "name": "record-prototype-qa-apply",
+      "command": "node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action qa --refinement-attempt <0|1|2> --qa-status <status> --apply --approve-prototype-qa --actor <actor> --at <timestamp>",
+      "writesFiles": true,
+      "requiresApproval": [
+        "--approve-prototype-qa"
+      ]
     }
   ],
   "payload": {
@@ -152,7 +230,7 @@
       {
         "path": "subskills/autodesign-visuals/SKILL.md",
         "status": "implemented",
-        "purpose": "Private visuals subskill contract for Stage 07 prompt, candidate, and selected reference records."
+        "purpose": "Private visuals subskill contract for prompt, candidate, and selected reference records."
       },
       {
         "path": "subskills/autodesign-views/SKILL.md",
@@ -171,23 +249,23 @@
       },
       {
         "path": "subskills/autodesign-wireframe/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private wireframe subskill contract for pencil.wireframe-set."
+        "status": "implemented",
+        "purpose": "Private wireframe subskill for Stage 08 Pencil wireframe metadata and canvas export records."
       },
       {
         "path": "subskills/autodesign-primitives/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private primitives subskill contract for design-system.primitives."
+        "status": "implemented",
+        "purpose": "Private primitives subskill for deterministic primitive inventory from selected references."
       },
       {
         "path": "subskills/autodesign-ds/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private design-system subskill contract for design-system.tokens."
+        "status": "implemented",
+        "purpose": "Private design-system subskill for DS tokens and component contracts."
       },
       {
         "path": "subskills/autodesign-prototype/SKILL.md",
-        "status": "contract-only",
-        "purpose": "Private prototype subskill contract for prototype.package."
+        "status": "implemented",
+        "purpose": "Private prototype subskill for prototype metadata and canvas export records."
       },
       {
         "path": "subskills/autodesign-handoff/SKILL.md",
@@ -212,7 +290,12 @@
       {
         "path": "subskills/autodesign-phase-placeholder/SKILL.md",
         "status": "legacy-placeholder",
-        "purpose": "Stage 04 placeholder retained for compatibility; concrete Stage 07 contracts are listed above."
+        "purpose": "Stage 04 placeholder retained for compatibility; concrete Stage 08 contracts are listed above."
+      },
+      {
+        "path": "subskills/autodesign-qa/SKILL.md",
+        "status": "implemented",
+        "purpose": "Private QA subskill for semantic visual QA and max-two-refinement records."
       }
     ],
     "scripts": [
@@ -224,7 +307,7 @@
       {
         "path": "scripts/generate-visual-references.mjs",
         "status": "implemented",
-        "purpose": "Stage 07 visual reference prompt, candidate, and selected-reference record workflow."
+        "purpose": "Visual reference prompt, candidate, and selected-reference record workflow."
       },
       {
         "path": "scripts/bootstrap.mjs",
@@ -234,12 +317,12 @@
       {
         "path": "scripts/lib/autodesign-state.mjs",
         "status": "implemented",
-        "purpose": "Shared deterministic validation, graph traversal, dirty computation, and gate-record helpers."
+        "purpose": "Shared deterministic validation, graph traversal, dirty computation, and Stage 08 gate helpers."
       },
       {
         "path": "scripts/validate-state.mjs",
         "status": "implemented",
-        "purpose": "Validate manifest and artifact graph JSON plus Stage 07 semantic constraints."
+        "purpose": "Validate manifest and artifact graph JSON plus Stage 08 semantic constraints."
       },
       {
         "path": "scripts/check-dependencies.mjs",
@@ -260,6 +343,11 @@
         "path": "scripts/record-gate.mjs",
         "status": "implemented",
         "purpose": "Record approval gate status in manifest with explicit write approval."
+      },
+      {
+        "path": "scripts/generate-pencil-prototype.mjs",
+        "status": "implemented",
+        "purpose": "Stage 08 Pencil live-check, wireframe, primitive, DS, prototype, QA, and refinement-gate workflow."
       }
     ],
     "hooks": [
@@ -316,24 +404,78 @@
       "--reference-id",
       "--actor",
       "--at"
+    ],
+    "pencilLiveCheckRequires": [
+      "--approve-pencil-live-check",
+      "--actor",
+      "--at",
+      "pencil-mcp.get_editor_state",
+      "autodesign-owned-virtual-pen-filePath"
+    ],
+    "pencilWireframeRequires": [
+      "--approve-pencil-wireframes",
+      "--actor",
+      "--at",
+      "pencil.live-check.approved",
+      "pencil-mcp.batch_design",
+      "pencil-mcp.export_nodes",
+      "--pencil-evidence-path",
+      "autodesign-owned-virtual-pen-filePath",
+      "batch-design-created-frame-ids",
+      "export-nodes-node-bindings",
+      "real-canvas-export-paths"
+    ],
+    "designSystemPrimitivesRequires": [
+      "--approve-design-system-primitives",
+      "--actor",
+      "--at",
+      "visual.reference-selection.approved"
+    ],
+    "designSystemGenerationRequires": [
+      "--approve-design-system-generation",
+      "--actor",
+      "--at",
+      "design-system.primitives.generated",
+      "pencil.wireframe-set.generated"
+    ],
+    "prototypeGenerationRequires": [
+      "--approve-prototype-generation",
+      "--actor",
+      "--at",
+      "pencil.live-check.approved",
+      "pencil-mcp.batch_design",
+      "pencil-mcp.export_nodes",
+      "--pencil-evidence-path",
+      "design-system.tokens.generated",
+      "autodesign-owned-virtual-pen-filePath",
+      "batch-design-created-frame-ids",
+      "export-nodes-node-bindings",
+      "real-canvas-export-paths"
+    ],
+    "prototypeQaRequires": [
+      "--approve-prototype-qa",
+      "--actor",
+      "--at",
+      "--refinement-attempt 0..2",
+      "prototype.package.generated"
     ]
   },
   "disabledBehaviors": {
     "canonicalGeneration": false,
     "imageGeneration": false,
-    "pencilOperations": true,
+    "pencilOperations": false,
     "visualReferenceGeneration": false,
-    "designSystemGeneration": true,
-    "prototypeGeneration": true,
+    "designSystemGeneration": false,
+    "prototypeGeneration": false,
     "handoff": true,
-    "realSubskillPhaseBehavior": true
+    "realSubskillPhaseBehavior": false
   },
   "notes": [
     "autodesign-start is the only public skill at install time.",
-    "Stage 07 keeps deterministic canonical generation available and implements visual reference prompt, candidate, and selected-reference records.",
-    "Primary visual anchor proposals are planning-only and are not auto-approved.",
-    "Candidate records require manually approved visual anchors and real generated image output paths.",
-    "Selected references require explicit user approval and cannot be auto-selected.",
-    "No Pencil operation, design-system work, prototype generation, handoff, reconcile report generation, eval report generation, or skill optimization is implemented."
+    "Stage 08 keeps canonical and visual reference repair available, then implements Pencil, DS, prototype, QA, and refinement record workflows after selected visual references are approved.",
+    "Pencil-derived records require a completed active Pencil MCP handoff: get_editor_state, batch_design, export_nodes, an Autodesign-owned virtual .pen filePath, created/exported node bindings, and real canvas export paths.",
+    "Externally supplied JSON is never the sole trust source; evidence must cross-check the virtual Pencil filePath plus actual export file bytes.",
+    "Primitive inventory, DS tokens/contracts, prototype metadata, semantic QA, and max-two-refinement records are deterministic metadata artifacts.",
+    "No frontend handoff, executable prototype code, fake Pencil canvas output, reconcile report, eval report, or skill optimization is implemented."
   ]
 }

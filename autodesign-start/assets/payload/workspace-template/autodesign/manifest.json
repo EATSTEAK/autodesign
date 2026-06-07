@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "07-visual-reference-gates",
+  "stage": "08-pencil-prototype-and-design-system",
   "package": "eatsteak/autodesign",
   "publicSkill": "autodesign-start",
   "workspace": {
@@ -28,10 +28,16 @@
       "visual.reference-candidates",
       "visual.reference-selection",
       "visual.reference-set",
+      "pencil.live-check",
       "pencil.wireframe-set",
+      "pencil.canvas-exports",
       "design-system.primitives",
       "design-system.tokens",
+      "design-system.contracts",
       "prototype.package",
+      "prototype.canvas-exports",
+      "prototype.visual-qa-report",
+      "prototype.refinement-log",
       "handoff.package"
     ]
   },
@@ -327,43 +333,49 @@
     {
       "name": "wireframe",
       "path": "subskills/autodesign-wireframe/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "canonical.screen-model",
         "canonical.interaction-model",
-        "canonical.screen-state-matrix"
+        "canonical.screen-state-matrix",
+        "visual.reference-set",
+        "pencil.live-check"
       ],
       "outputArtifacts": [
-        "pencil.wireframe-set"
+        "pencil.wireframe-set",
+        "pencil.canvas-exports"
       ],
-      "outputFiles": [],
+      "outputFiles": [
+        "autodesign/outputs/pencil/wireframes/wireframe-metadata.json",
+        "autodesign/outputs/pencil/canvas-exports.json"
+      ],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "selected-visual-references.approved",
+        "pencil-operations.enabled",
+        "pencil-live-check.generated"
       ],
-      "disabledBehaviors": [
-        "pencilOperations",
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
-        "Stop if state validation fails.",
-        "Stop if graph dependencies are missing or cyclic.",
-        "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
+        "Stop if selected visual references are absent or not approved.",
+        "Stop if Pencil live-check evidence is absent, unavailable, or does not target the Autodesign-owned virtual .pen filePath.",
+        "Stop if the target .pen path is not under autodesign/outputs/pencil/.",
+        "Stop if active Pencil MCP batch_design/export_nodes evidence is absent.",
+        "Stop if batch_design created frame ids, export_nodes node bindings, or canvas export paths are absent or do not match evidence hashes.",
+        "Record metadata and export paths only after the live Pencil agent action; do not fake Pencil canvas output."
       ]
     },
     {
       "name": "primitives",
       "path": "subskills/autodesign-primitives/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "canonical.brand-direction",
         "visual.reference-set"
@@ -371,94 +383,146 @@
       "outputArtifacts": [
         "design-system.primitives"
       ],
-      "outputFiles": [],
+      "outputFiles": [
+        "autodesign/outputs/design-system/primitives.json"
+      ],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "selected-visual-references.approved",
+        "design-system-generation.enabled"
       ],
-      "disabledBehaviors": [
-        "designSystemGeneration",
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
-        "Stop if state validation fails.",
-        "Stop if graph dependencies are missing or cyclic.",
-        "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
+        "Stop if selected visual references are absent or not approved.",
+        "Stop if canonical brand direction is absent.",
+        "Generate deterministic primitive inventory only from canonical brand and selected reference metadata.",
+        "Do not sample images or fake visual evidence."
       ]
     },
     {
       "name": "ds",
       "path": "subskills/autodesign-ds/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "design-system.primitives",
         "visual.reference-set",
         "pencil.wireframe-set"
       ],
       "outputArtifacts": [
-        "design-system.tokens"
+        "design-system.tokens",
+        "design-system.contracts"
       ],
-      "outputFiles": [],
+      "outputFiles": [
+        "autodesign/outputs/design-system/tokens.json",
+        "autodesign/outputs/design-system/contracts.json"
+      ],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "selected-visual-references.approved",
+        "design-system-generation.enabled",
+        "design-system-primitives.generated",
+        "pencil-wireframes.generated"
       ],
-      "disabledBehaviors": [
-        "designSystemGeneration",
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
-        "Stop if state validation fails.",
-        "Stop if graph dependencies are missing or cyclic.",
-        "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
+        "Stop if primitive inventory or Pencil wireframe metadata is absent.",
+        "Persist DS tokens and component contracts only.",
+        "Do not generate frontend handoff or implementation files."
       ]
     },
     {
       "name": "prototype",
       "path": "subskills/autodesign-prototype/SKILL.md",
-      "status": "contract-only",
-      "contractOnly": true,
-      "implemented": false,
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
       "requiredUpstreamArtifacts": [
         "canonical.screen-model",
         "canonical.interaction-model",
         "canonical.screen-state-matrix",
+        "visual.reference-set",
+        "pencil.live-check",
         "pencil.wireframe-set",
-        "design-system.tokens"
+        "pencil.canvas-exports",
+        "design-system.tokens",
+        "design-system.contracts"
       ],
       "outputArtifacts": [
-        "prototype.package"
+        "prototype.package",
+        "prototype.canvas-exports"
       ],
-      "outputFiles": [],
+      "outputFiles": [
+        "autodesign/outputs/prototype/prototype-metadata.json",
+        "autodesign/outputs/prototype/canvas-exports.json"
+      ],
       "hardGates": [
         "state.valid",
         "graph.dependencies.valid",
         "upstream-artifacts.exist",
         "output-artifacts.declared",
-        "disabled-behaviors.enforced",
-        "no-real-phase-behavior"
+        "selected-visual-references.approved",
+        "pencil-operations.enabled",
+        "prototype-generation.enabled",
+        "pencil-live-check.generated",
+        "pencil-wireframes.generated",
+        "design-system-tokens.generated",
+        "design-system-contracts.generated"
       ],
-      "disabledBehaviors": [
-        "prototypeGeneration",
-        "realSubskillPhaseBehavior"
-      ],
+      "disabledBehaviors": [],
       "failFast": [
-        "Stop if state validation fails.",
-        "Stop if graph dependencies are missing or cyclic.",
-        "Stop if any required upstream artifact path is absent.",
-        "Stop after reporting contract-only status; do not generate or mutate downstream outputs."
+        "Stop if selected visual references, Pencil live-check, live Pencil frame/export evidence, wireframes, canvas export records, tokens, or contracts are absent.",
+        "Stop if the target .pen path is not under autodesign/outputs/pencil/.",
+        "Stop if active Pencil MCP batch_design/export_nodes evidence is absent.",
+        "Persist prototype metadata and real canvas export path records only.",
+        "Do not generate frontend handoff or implementation files."
+      ]
+    },
+    {
+      "name": "qa",
+      "path": "subskills/autodesign-qa/SKILL.md",
+      "status": "implemented",
+      "contractOnly": false,
+      "implemented": true,
+      "requiredUpstreamArtifacts": [
+        "visual.reference-set",
+        "pencil.wireframe-set",
+        "pencil.canvas-exports",
+        "design-system.tokens",
+        "design-system.contracts",
+        "prototype.package",
+        "prototype.canvas-exports"
+      ],
+      "outputArtifacts": [
+        "prototype.visual-qa-report",
+        "prototype.refinement-log"
+      ],
+      "outputFiles": [
+        "autodesign/outputs/prototype/visual-qa-report.json",
+        "autodesign/outputs/prototype/refinement-log.json"
+      ],
+      "hardGates": [
+        "state.valid",
+        "graph.dependencies.valid",
+        "upstream-artifacts.exist",
+        "output-artifacts.declared",
+        "selected-visual-references.approved",
+        "prototype-package.generated",
+        "prototype-refinement-limit.valid"
+      ],
+      "disabledBehaviors": [],
+      "failFast": [
+        "Stop if prototype metadata or canvas export records are absent.",
+        "Stop if the refinement attempt is greater than two.",
+        "Persist semantic QA and refinement-gate records only.",
+        "Do not generate frontend handoff or implementation files."
       ]
     },
     {
@@ -691,7 +755,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Canonical generation remains available for Stage 07 upstream repair.",
+      "note": "Canonical generation remains available for Stage 08 upstream repair.",
       "history": []
     },
     {
@@ -802,55 +866,158 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Stage 07 records active-agent image-generation instructions and generated output paths, but scripts do not create or fake images.",
+      "note": "Visual reference candidate records persist active-agent image-generation instructions and generated output paths, but scripts do not create or fake images.",
+      "history": []
+    },
+    {
+      "id": "pencil.live-check",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "pencil.live-check"
+      ],
+      "requires": [
+        "pencil-mcp.get_editor_state",
+        "autodesign-owned-virtual-pen-filePath",
+        "--approve-pencil-live-check",
+        "--actor",
+        "--at"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Pencil availability must be live-checked by an active Pencil MCP agent and target an Autodesign-owned virtual .pen filePath; externally supplied JSON alone is not sufficient.",
       "history": []
     },
     {
       "id": "pencil.operations",
-      "status": "not-implemented",
+      "status": "pending",
       "required": true,
-      "implemented": false,
+      "implemented": true,
       "scope": [
-        "pencil"
+        "pencil.live-check",
+        "pencil.wireframe-set",
+        "pencil.canvas-exports"
       ],
       "requires": [
-        "later-stage"
+        "pencil.live-check.approved",
+        "pencil-mcp.batch_design",
+        "pencil-mcp.export_nodes",
+        "pencil-evidence-path",
+        "autodesign-owned-virtual-pen-filePath",
+        "batch-design-created-frame-ids",
+        "export-nodes-node-bindings",
+        "real-canvas-export-paths",
+        "--approve-pencil-wireframes",
+        "--actor",
+        "--at"
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Pencil operations are outside Stage 07.",
+      "note": "Pencil actions must be completed by an active Pencil MCP agent against autodesign/outputs/pencil/*.pen before scripts record frame and export evidence.",
+      "history": []
+    },
+    {
+      "id": "design-system.primitives",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "design-system.primitives"
+      ],
+      "requires": [
+        "visual.reference-selection.approved",
+        "--approve-design-system-primitives",
+        "--actor",
+        "--at"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Primitive inventory requires selected visual references and canonical brand direction.",
       "history": []
     },
     {
       "id": "design-system.generation",
-      "status": "not-implemented",
+      "status": "pending",
       "required": true,
-      "implemented": false,
+      "implemented": true,
       "scope": [
-        "design-system"
+        "design-system.tokens",
+        "design-system.contracts"
       ],
       "requires": [
-        "later-stage"
+        "design-system.primitives.generated",
+        "pencil.wireframe-set.generated",
+        "--approve-design-system-generation",
+        "--actor",
+        "--at"
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Design-system generation is outside Stage 07.",
+      "note": "DS tokens and contracts require primitives and Pencil wireframe metadata.",
       "history": []
     },
     {
       "id": "prototype.generation",
-      "status": "not-implemented",
+      "status": "pending",
       "required": true,
-      "implemented": false,
+      "implemented": true,
       "scope": [
-        "prototype"
+        "prototype.package",
+        "prototype.canvas-exports"
       ],
       "requires": [
-        "later-stage"
+        "pencil.live-check.approved",
+        "pencil.wireframe-set.generated",
+        "design-system.tokens.generated",
+        "real-canvas-export-paths",
+        "--approve-prototype-generation",
+        "--actor",
+        "--at"
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Prototype generation is outside Stage 07.",
+      "note": "Prototype metadata requires selected references, DS contracts, Pencil metadata, and real canvas exports.",
+      "history": []
+    },
+    {
+      "id": "prototype.visual-qa",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "prototype.visual-qa-report"
+      ],
+      "requires": [
+        "prototype.package.generated",
+        "prototype.canvas-exports.generated",
+        "--approve-prototype-qa",
+        "--actor",
+        "--at"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Semantic visual QA compares selected references, Pencil metadata, DS tokens/contracts, and prototype records.",
+      "history": []
+    },
+    {
+      "id": "prototype.refinement",
+      "status": "pending",
+      "required": true,
+      "implemented": true,
+      "scope": [
+        "prototype.refinement-log"
+      ],
+      "requires": [
+        "max-two-refinement-attempts",
+        "--refinement-attempt 0..2",
+        "--approve-prototype-qa",
+        "--actor",
+        "--at"
+      ],
+      "updatedAt": null,
+      "actor": null,
+      "note": "Refinement is blocked after two unsuccessful semantic QA attempts unless the user records a separate gate decision.",
       "history": []
     },
     {
@@ -866,7 +1033,7 @@
       ],
       "updatedAt": null,
       "actor": null,
-      "note": "Handoff export is outside Stage 07.",
+      "note": "Frontend handoff remains outside Stage 08.",
       "history": []
     }
   ],
@@ -874,20 +1041,19 @@
   "disabledBehaviors": {
     "canonicalGeneration": false,
     "imageGeneration": false,
-    "pencilOperations": true,
+    "pencilOperations": false,
     "visualReferenceGeneration": false,
-    "designSystemGeneration": true,
-    "prototypeGeneration": true,
+    "designSystemGeneration": false,
+    "prototypeGeneration": false,
     "handoff": true,
-    "realSubskillPhaseBehavior": true
+    "realSubskillPhaseBehavior": false
   },
   "notes": [
-    "Stage 07 enables visual reference prompt, candidate, and selection records after generated canonical visual anchor proposals.",
-    "UX platform selection is a hard gate for UX rules, interaction model, screen-state matrix, and visual anchor proposals.",
-    "Primary visual anchor proposals are planning-only and are not auto-approved.",
-    "Candidate recording requires manual visual anchor approval and real generated output paths.",
-    "Selected references require explicit user approval and are never auto-selected.",
-    "No Pencil operations, design-system outputs, prototypes, or handoff packages are generated in Stage 07."
+    "Stage 08 requires approved selected visual references before Pencil, design-system, prototype, or QA records can run.",
+    "Pencil actions require active Pencil MCP get_editor_state, batch_design, and export_nodes evidence, plus an Autodesign-owned virtual .pen filePath under autodesign/outputs/pencil/.",
+    "Scripts persist metadata, canvas export path records, primitive inventory, DS tokens/contracts, semantic visual QA, and the max-two-refinement gate only after live Pencil evidence cross-checks the virtual Pencil filePath and actual export file bytes.",
+    "Scripts never create or fake Pencil canvas output and fail fast when live Pencil evidence, created/exported node bindings, or real export files are missing.",
+    "Frontend handoff remains disabled and not implemented in Stage 08."
   ],
   "generationRecords": []
 }

@@ -1,34 +1,42 @@
 ---
 name: autodesign-ds
-description: Private Stage 06 contract for the Autodesign design-system subskill. Contract-only; checks prerequisites and does not generate DS artifacts.
+description: Private Stage 08 design-system subskill. Generates DS tokens and component contracts from primitives, selected references, and Pencil wireframes.
 ---
 
-# Autodesign Design System Contract
+# Autodesign Design System
 
-This private payload subskill is not public. Enter it only through `autodesign-start` or a later orchestrator after running the deterministic readiness check.
+This private payload subskill is not public. Enter it only through `autodesign-start` or a later orchestrator after running deterministic readiness checks.
 
 ## Required Upstream Artifacts
 
 - `design-system.primitives` at `autodesign/outputs/design-system/primitives.json`
-- `visual.reference-set` at `autodesign/outputs/visual-references`
-- `pencil.wireframe-set` at `autodesign/outputs/pencil/wireframes`
+- `visual.reference-set` after approved selected visual references
+- `pencil.wireframe-set` at `autodesign/outputs/pencil/wireframes/wireframe-metadata.json`
 
 ## Output Artifacts
 
 - `design-system.tokens` at `autodesign/outputs/design-system/tokens.json`
-
-Stage 06 declares this output only. Do not create or update it.
+- `design-system.contracts` at `autodesign/outputs/design-system/contracts.json`
 
 ## Hard Gates
 
 - `scripts/can-run-subskill.mjs --workspace <workspace> --subskill ds` must pass.
-- `manifest.disabledBehaviors.designSystemGeneration` must be `true`.
-- `manifest.disabledBehaviors.realSubskillPhaseBehavior` must be `true`.
-- The artifact graph must contain every required upstream and output artifact id.
+- `visual.reference-selection` must be approved and contain selected records.
+- `manifest.disabledBehaviors.designSystemGeneration` must be `false`.
+- Primitive inventory and Pencil wireframe metadata with live MCP evidence must already be generated.
 
-## Fail Fast
+## Run
 
-- Stop if state validation fails.
-- Stop if graph dependencies are missing or cyclic.
-- Stop if any required upstream artifact path is missing.
-- If all gates pass, report contract-only status and stop before design-system or token generation.
+Plan first:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action ds --plan
+```
+
+Apply only with explicit approval:
+
+```bash
+node autodesign-start/assets/payload/scripts/generate-pencil-prototype.mjs --workspace <workspace> --action ds --apply --approve-design-system-generation --actor <actor> --at <timestamp>
+```
+
+The script persists tokens and component contracts only. It does not generate frontend code, handoff files, or fake Pencil output.
